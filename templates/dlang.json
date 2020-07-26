@@ -1,0 +1,77 @@
+{
+    "structure":{
+        "type": "struct",
+        "struct": "{TYPE} {NAME}",
+        "docstring":"/*{DOC}*/",
+        "variable": "{TYPE} {VARIABLE}",
+        "parameter":"{TYPE} {VARIABLE}",
+        "defaultParameter": "{TYPE} {VARIABLE} = {VALUE}",
+        "memberDoc":"// {DOC}",
+        "memberDeclaration": "{TYPE} {VARIABLE}",
+        "memberAssigment": "{VARIABLE} = {VALUE}",
+        "inlineDefinition": "{TYPE} {VARIABLE} = {VALUE}",
+        "constructor": "this({PARAMETERS})",
+        "destructor": "~this()",
+        "requireConstructor":false,
+        "route": "Route({METHOD}, {PATH})"
+    },
+    "enum":{
+        "type":"enum",
+        "enum": "{NAME} : {TYPE}",
+        "member": "{MEMBER} = {VALUE}",
+        "typeMember": "{TYPE} {MEMBER} = {VALUE}",
+        "delimeter": ",\n"
+    },
+    "function":{
+        "returnType":"{TYPE}",
+        "definition":"{TYPE} {NAME}({PARAMETERS}) {BODY}",
+        "returnSyntax":"return {RETURN};" 
+    },
+    "types":{
+        "integer":"int",
+        "boolean":"bool",
+        "str": "string",
+        "ISO8601 timestamp": "DateTime",
+        "file contents":"File",
+        "null": "void",
+        "none": "null",
+        "nullable":"Nullable!{TYPE}",
+        "constructor":"this",
+        "list":"{TYPE}[]"
+    },
+    "values":{
+        "true":"true",
+        "false":"false",
+        "none":"null"
+    },
+    "methods":{
+        "GET":"HTTPMethod.GET",
+        "POST":"HTTPMethod.POST",
+        "PUT":"HTTPMethod.PUT",
+        "DELETE":"HTTPMethod.DELETE",
+        "PATCH":"HTTPMethod.PATCH"
+    },
+    "sizes":{
+        "struct": 8,
+        "bool":8, "byte":8, "ubyte":8, "char":8,
+        "short":16, "ushort":16, "wchar":16,
+        "int":32, "uint":32, "dchar":32,
+        "long":64, "ulong":64,
+        "float":32, "double":64, "real":80,
+        "cent":128, "ucent":128
+    },
+    "language":{
+        "openScope":"{",
+        "closeScope":"}\n",
+        "lineend":";\n",
+        "delimiter":"curly brackets",
+        "comment":"//",
+        "docstring":"above",
+        "multilineCommentStart":"/*",
+        "multilineCommentMiddle":" * ",
+        "multilineCommentEnd":"*/",
+        "param_docstring":"{NAME} = {DESC}",
+        "fileExt":"d",
+        "boilerplate":"import std.typecons, core.time;\nalias snowflake = long;\n"
+    }
+}

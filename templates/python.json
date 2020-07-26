@@ -1,0 +1,85 @@
+{
+    "structure":{
+        "type": "class",
+        "struct": "{TYPE} {NAME}",
+        "docstring":"'''{DOC}'''",
+        "variable_": "{VARIABLE}: {VALUE}",
+        "variable": "{VARIABLE}: {TYPE}",
+        "parameter": "{VARIABLE}: {TYPE}",
+        "defaultParameter": "{VARIABLE}: {TYPE}={VALUE}",
+        "slots": "__slots__ = ('{VARIABLES}')",
+        "memberDoc":"# {DOC}",
+        "memberDeclaration":"",
+        "memberAssigment":"self.{VARIABLE} = {VALUE}",
+        "inlineDefinition":"{VARIABLE} = {VALUE}",
+        "constructor": "def __init__(self, {PARAMETERS})",
+        "requireConstructor":true,
+        "route": "Route({METHOD}, {PATH})"
+    },
+    "enum":{
+        "type":"class",
+        "enum":"{NAME}(Enum)",
+        "flag":"{NAME}(Flag)",
+        "member":"{MEMBER} = {VALUE}",
+        "typeMember":"",
+        "delimeter":"\n"
+    },
+    "function":{
+        "returnType":"",
+        "definition":"def {NAME}({PARAMETERS}){BODY}",
+        "returnSyntax":"return {RETURN}"
+    },
+    "types":{
+        "string": "str",
+        "boolean":"bool",
+        "integer": "int",
+        "snowflake": "int",
+        "nullable":"{TYPE}",
+        "list":"List[{TYPE}]",
+        "none":"None",
+        "ISO8601 timestamp": "datetime.datetime",
+        "file contents":"bytes",
+        "constructor":"__init__",
+        "flag":"Flag"
+    },
+    "values":{
+        "false":"False",
+        "true":"True",
+        "none":"None"
+    },
+    "methods":{
+    },
+    "sizes":{
+        "None":16,
+        "Ellipsis":16,
+        "Object":16,
+        "int":24,
+        "bool":24,
+        "float":24,
+        "tuple":24,
+        "list":40,
+        "str":49,
+        "Exception":64,
+        "Lambda":112,
+        "Function-ref":112,
+        "set":200,
+        "frozenset":200,
+        "dict":264
+    },
+    "language":{
+        "openScope": ":",
+        "closeScope": "",
+        "lineend": "\n",
+        "delimeter": "indentation",
+        "docstring":"below",
+        "comment":"#",
+        "multilineCommentStart":"'''",
+        "multilineCommentEnd":"'''",
+        "param_docstring":":{NAME}: {DESC}",
+        "indentationCount":"4",
+        "spaces":true,
+        "fileExt":"py",
+        "boilerplate":"from enum import Enum, Flag\nfrom typing import List\nimport datetime\nfrom __future__ import annotations\n",
+        "additional":["slots"]
+    }
+}

@@ -1,0 +1,9 @@
+{
+    "object":{
+
+    },
+    "types":{
+        "str": "TEXT",
+        "int": "INT"
+    }
+}
