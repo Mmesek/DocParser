@@ -1,16 +1,19 @@
 import json
 from generator_utils import *
-with open("templates/dlang.json", "r", newline="", encoding="utf-8") as file:
-    _ = json.load(file)
+def load_language(language):
+    with open(f"templates/{language}.json", "r", newline="", encoding="utf-8") as file:
+        _ = json.load(file)
+    global syntax, enum, func, types, values, sizes, l, methods
 
-syntax = _["structure"]
-enum = _["enum"]
-func = _["function"]
-types = _["types"]
-values = _["values"]
-sizes = _["sizes"]
-l = _["language"]
-methods = _["methods"]
+    syntax = _["structure"]
+    enum = _["enum"]
+    func = _["function"]
+    types = _["types"]
+    values = _["values"]
+    sizes = _["sizes"]
+    l = _["language"]
+    methods = _["methods"]
+    return syntax, enum, func, types, values, sizes, l, methods
 
 def check_sizes(variables):
     ordered = sorted(variables, key=lambda x: sizes.get(types.get(x["type"], "struct"), 512), reverse=True)
