@@ -1,7 +1,8 @@
 import json
 #from json_parser2 import generate_function, generate_object, l
 from json_parser2 import *
-syntax, enum, func, types, values, sizes, l, methods = load_language('dlang')
+from utils import check_if_exists, args
+syntax, enum, func, types, values, sizes, l, methods = load_language(args()[1])
 
 def load(name):
     with open(f"results/{name}.json", "r", newline="", encoding="utf-8") as file:
@@ -42,7 +43,7 @@ def iterate(name):
                 pass
     s += "\n\n" + r + e
     save(name, s)
-from utils import check_if_exists
+
 
 def save(name, s):
     check_if_exists('results/src')
