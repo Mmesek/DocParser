@@ -8,7 +8,12 @@ def args():
     except:
         _in = "discord"
         _out = "dlang"
-        print("Missing input and/or output arguments. Example usage: json_parser_test.py discord dlang. \n\tSupported Inputs:\n- discord\n\tSupported Outputs:\n- dlang\n- python")
+        import glob
+        _i = glob.glob(dirname(__file__) + '/docs_structures/**/*', recursive=True)
+        inputs = '- '+'\n- '.join([i.replace('\\','/').split('/')[-1].split('.')[0] for i in _i])
+        _o = glob.glob(dirname(__file__) + '/templates/**/*', recursive=True)
+        outputs = '- '+'\n- '.join([i.replace('\\', '/').split('/')[-1].split('.')[0] for i in _o])
+        print("Missing input and/or output arguments.\n\tExample usage:\njson_parser_test.py discord dlang.\n\n\tSupported Inputs:\n{inputs}\n\tSupported Outputs:\n{outputs}".format(inputs=inputs, outputs=outputs))
         #exit()
     return (_in, _out)
 
