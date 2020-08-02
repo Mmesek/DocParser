@@ -79,7 +79,7 @@
         "indentationCount":"4",
         "spaces":true,
         "fileExt":"py",
-        "boilerplate":"from enum import Enum, Flag\nfrom typing import List\nimport datetime\nfrom __future__ import annotations\n",
+        "boilerplate":"from __future__ import annotations\nfrom enum import Enum, Flag\nfrom typing import List\nimport datetime\n",
         "additional":["slots"]
     }
 }
