@@ -39,14 +39,14 @@ def iterate_variables(o, function=False):
     enum_type = "int"
     variables = o["variables"]
     for v in variables:
-        t = types.get(v.get("type", v.get("flag", "unknown")), v.get("type", v.get("flag", "")))
+        t = types.get(v.get("type", v.get("flag", "unknown")), v.get("type", v.get("flag", v.get("name", v.get("event", v.get("docstring",""))))))
         if " or " in t:
             t = t.split(" or ")[-1]
-        name = v.get("name", v.get("value", v.get("id", '""')))
-        if "Types" in o["name"]:
+        name = v.get("value", v.get("name", v.get("id", '""')))
+        if "Types" in o["name"] or "Flags" in o["name"] or "Events" in o["name"]:
             if not name.isdigit():
                 enum_type = types.get("string","string")
-            t = t.upper().replace(" ", "_")
+            t = t.upper().replace(" ", "_").replace('-','_')
         if "optional" in v:
             t = types.get("nullable", "{TYPE}").format(TYPE=t)
         if "is_list" in v:
