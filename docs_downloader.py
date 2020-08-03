@@ -22,6 +22,10 @@ if __name__ == "__main__":
     import sys
     try:
         src = sys.argv[1]
+        download_docs(src)
     except:
-        print('Specify json in docs_structures to use')
-    download_docs(src)
+        import glob
+        from os.path import dirname
+        _o = glob.glob(dirname(__file__) + '/docs_structures/**/*', recursive=True)
+        structures = '- '+'\n- '.join([i.replace('\\', '/').split('/')[-1].split('.')[0] for i in _o])
+        print('Specify json from docs_structures to use\n\tAvailable structures:\n'+structures)
