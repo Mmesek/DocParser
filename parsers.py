@@ -9,7 +9,7 @@ require_permission_pattern = re.compile("(?i)Requires the (.*?) permission")
 
 def endpointParser(title, content):
     e = title.split(" % ", 1)
-    name = e[0].strip("#").strip()
+    name = e[0].strip("#").strip().replace('-','_')
     s = e[1].split(" ", 1)
     method = s[0].split("/")[0]
     path = s[1].strip()
@@ -110,7 +110,7 @@ def tableParser(name, kind, table):
                     v["nullable"] = True
                     params[column][x] = params[column][x].strip('?')
                 if 'list of' in params[column][x] or 'array of' in params[column][x]:
-                    returns = re.findall(r"(array|list) of \[(.*?)\]\(.*?\)", params[column][x])
+                    returns = re.findall(r"(array|list) of (?:.*?)?\[(.*?)\]\(.*?\)", params[column][x])
                     if returns != []:
                         if returns[0][1] != '':
                             v["type"] = check_urls(returns[0][1].replace(' ', '_').title())
