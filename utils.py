@@ -17,11 +17,14 @@ def args():
         #exit()
     return (_in, _out)
 
-def listFiles(path):
+def listFiles(path, include_directory=False):
     import glob
     from os.path import dirname
     files = glob.glob(dirname(__file__) + f'/{path}/**/*', recursive=True)
-    return [i.replace('\\', '/').split('/')[-1].split('.')[0] for i in files]
+    if include_directory:
+        return [i.replace(dirname(__file__)+'/'+path, '') for i in files]
+    else:
+        return [i.replace('\\', '/').split('/')[-1].split('.')[0] for i in files]
 
 def load_json(path):
     import json
