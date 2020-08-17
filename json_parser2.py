@@ -39,13 +39,17 @@ def iterate_variables(o, function=False):
     enum_type = "int"
     variables = o["variables"]
     for v in variables:
-        t = types.get(v.get("type", v.get("flag", "unknown")), v.get("type", v.get("flag", v.get("name", v.get("event", v.get("docstring",""))))))
+        t = types.get(v.get("type", v.get("flag", "unknown")), v.get("type", v.get("flag", v.get("name", v.get("event", v.get("status", v.get("docstring","")))))))
         if " or " in t:
             t = t.split(" or ")[-1]
-        name = v.get("value", v.get("name", v.get("id", '""')))
+        name = v.get("value", v.get("id", v.get("name", v.get("status", v.get("type", '""')))))
         if "Types" in o["name"] or "Flags" in o["name"] or "Events" in o["name"]:
-            if not name.isdigit():
+            if not name.isdigit() and "<<" not in name:
                 enum_type = types.get("string","string")
+                if name[0] != '"':
+                    name = f'"{name}"'
+            elif ">>" in name or "<<" in name:
+                enum_type = types.get("int","int")
             t = t.upper().replace(" ", "_").replace('-','_')
         if "optional" in v:
             t = types.get("nullable", "{TYPE}").format(TYPE=t)
@@ -66,7 +70,7 @@ def iterate_variables(o, function=False):
             members += addIndentation(1) + member
         else:
             members += [member]
-        if not function and "Types" not in o["name"] and "Flags" not in o["name"]:
+        if not function and "Types" not in o["name"] and "Flags" not in o["name"] and "Events" not in o["name"]:
             members += l["lineend"]
         elif not function:
             _enum = True
@@ -186,7 +190,7 @@ def generate_object(o):
     if l["docstring"] == "below":
         s += '\n'+addIndentation(1) + s_doc
     s += "\n" + members
-    if syntax.get('requireConstructor', False) and not any(i in o['name'].lower() for i in ['type', 'flag']):
+    if syntax.get('requireConstructor', False) and not any(i in o['name'].lower() for i in ['type', 'flag', 'event']):
         j = {"name":types.get("constructor",""),"params":{"params":o.get("variables")}}
         s += addIndentation(1) + generate_function(j, constructor=True)
     s += l["closeScope"] + "\n"
