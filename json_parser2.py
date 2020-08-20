@@ -54,7 +54,7 @@ def iterate_variables(o, function=False):
         if "optional" in v:
             t = types.get("nullable", "{TYPE}").format(TYPE=t)
         if "is_list" in v:
-            t = types.get("list", "{TYPE}").format(TYPE=t)
+            t = types.get("list", "{TYPE}").format(TYPE=t, SIZE=v.get('size',""))
         if "Structure" in o["name"]:
             member = syntax["variable"].format(TYPE=types.get(t, t), VARIABLE=name)
         elif "function" in o["name"]:
@@ -93,7 +93,7 @@ def generate_function(o, constructor=False):
     r = types.get(r, r)
     _r = r
     if o.get('return_list', False):
-        r = types.get('list', '{TYPE}').format(TYPE=r)
+        r = types.get('list', '{TYPE}').format(TYPE=r, SIZE=o.get("size",""))
     for param in o.get('parameters', []):
         if 'id' in param:
             param_type = 'snowflake'
@@ -202,8 +202,12 @@ def generate_route(o):
     return enum['member'].format(MEMBER=name, VALUE=val)
 
 def generate_enum_of_routes(o):
-    s = syntax['struct'].format(TYPE=enum['type'], NAME=enum['enum'].format(NAME='Routes', TYPE='Route')) + l['openScope'] + '\n'
+    m = ""
     for member in o:
-        s += addIndentation(1) + member + enum['delimeter']
+        m += addIndentation(1) + member + enum['delimeter']
+    if m == "":
+        return ""
+    s = syntax['struct'].format(TYPE=enum['type'], NAME=enum['enum'].format(NAME='Routes', TYPE='Route')) + l['openScope'] + '\n'
+    s+= m
     s+= l['closeScope'] + '\n'
     return s

@@ -122,6 +122,18 @@ def tableParser(name, kind, table):
                             else:
                                 v["type"] = check_urls(returns[0][1].replace(' ', '_').title())
                     v["is_list"] = True
+                    digit = re.findall(r"(?i)(\d+|one|two|three|four|five|six|seven|eight|nine|ten)", params[column][x])
+                    if digit != []:
+                        digits = {"one":1, "two":2, "three":3, "four":4, "five":5, "six":6, "seven":7, "eigth":8, "nine":9, "ten":10}
+                        v['size'] = digits.get(digit[0], digit[0])
+                        try:
+                            v["type"] = v["type"].split("(")[0].split("_")[1]
+                            if v["type"] == "Integers":
+                                v["type"] = "integer"
+                        except:
+                            print(v['type'])
+                    else:
+                        v['size'] = ''
                 else:
                     returns = re.findall(r"\[(.*?)\]\(.*?\)", params[column][x])
                     if returns != []:

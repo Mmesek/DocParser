@@ -37,7 +37,7 @@
         "none": "null",
         "nullable":"Nullable!{TYPE}",
         "constructor":"this",
-        "list":"{TYPE}[]"
+        "list":"{TYPE}[{SIZE}]"
     },
     "values":{
         "true":"true",
