@@ -92,6 +92,9 @@ def generate_function(o, constructor=False):
         r = 'null'
     r = types.get(r, r)
     _r = r
+    req_perm = ', '.join(['"%s"' % i for i in o.get('required_permission', [])])
+    if req_perm != '':
+        req_perm = func['decorator'].format(NAME='Permissions', PARAMETERS=req_perm) + '\n'
     if o.get('return_list', False):
         r = types.get('list', '{TYPE}').format(TYPE=r, SIZE=o.get("size",""))
     for param in o.get('parameters', []):
@@ -145,8 +148,9 @@ def generate_function(o, constructor=False):
         b += func['returnSyntax'].format(RETURN=_r+'()')
 
     b += '\n' + l['closeScope']
+    s += req_perm
     if types.get("constructor") != o["name"]:
-        s += func["definition"].format(TYPE=r, NAME=o.get("name").replace("/", "_or_").replace(" ", "_").lower(), PARAMETERS=p, BODY=b)
+        s += func["definition"].format(TYPE=types.get(r, r), NAME=o.get("name").replace("/", "_or_").replace(" ", "_").lower(), PARAMETERS=p, BODY=b)
     else:
         b = ''
         for param in param_index:

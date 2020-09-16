@@ -23,6 +23,7 @@
         "delimeter": ",\n"
     },
     "function":{
+        "decorator":"@{NAME}({PARAMETERS})",
         "returnType":"{TYPE}",
         "definition":"{TYPE} {NAME}({PARAMETERS}) {BODY}",
         "returnSyntax":"return {RETURN};" 
