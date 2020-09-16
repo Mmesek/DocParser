@@ -25,8 +25,9 @@
         "delimeter":"\n"
     },
     "function":{
+        "decorator":"@{NAME}({PARAMETERS})",
         "returnType":"",
-        "definition":"def {NAME}({PARAMETERS}){BODY}",
+        "definition":"def {NAME}({PARAMETERS}) -> {TYPE}{BODY}",
         "returnSyntax":"return {RETURN}"
     },
     "types":{
@@ -36,6 +37,7 @@
         "snowflake": "int",
         "nullable":"{TYPE}",
         "list":"List[{TYPE}]",
+        "null": "None",
         "none":"None",
         "ISO8601 timestamp": "datetime.datetime",
         "file contents":"bytes",
