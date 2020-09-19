@@ -14,7 +14,9 @@
         "inlineDefinition":"{VARIABLE} = {VALUE}",
         "constructor": "def __init__(self, {PARAMETERS})",
         "requireConstructor":true,
-        "route": "Route({METHOD}, {PATH})"
+        "route": "Route({METHOD}, {PATH})",
+        "cast":"{TYPE}({VALUE})",
+        "list_cast":"[{TYPE}(i) for i in {VALUE}]"
     },
     "enum":{
         "type":"class",

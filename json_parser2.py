@@ -35,6 +35,7 @@ def iterate_variables(o, function=False):
         members = []
     else:
         members = ""
+    _types = []
     docs = ""
     enum_type = "int"
     variables = o["variables"]
@@ -50,7 +51,8 @@ def iterate_variables(o, function=False):
                     name = f'"{name}"'
             elif ">>" in name or "<<" in name:
                 enum_type = types.get("int","int")
-            t = t.upper().replace(" ", "_").replace('-','_')
+            t = t.upper().replace(" ", "_").replace('-', '_')
+        _types.append((t, v.get('is_list', False)))
         if "optional" in v:
             t = types.get("nullable", "{TYPE}").format(TYPE=t)
         if "is_list" in v:
@@ -76,7 +78,7 @@ def iterate_variables(o, function=False):
             _enum = True
             members += enum["delimeter"]
     if not _enum or function:
-        return docs, members, None
+        return docs, members, _types if o["name"] == "function" else None
     else:
         return docs, members, enum_type
 
@@ -107,11 +109,11 @@ def generate_function(o, constructor=False):
         p += syntax['parameter'].format(TYPE=types.get(param_type, param_type), VARIABLE=param)
     for param_kind in ["json_params", "query_params", "params", "other_params"]:
         if "params" in o.get(param_kind, {}):
-            docs, params, none = iterate_variables({"variables":o[param_kind]['params'], "name":"function"}, True)
+            docs, params, _types = iterate_variables({"variables":o[param_kind]['params'], "name":"function"}, True)
             if o[param_kind].get("docstring", "") != "":
                 d += '\n'+o[param_kind].get("docstring")
             param_docs += docs
-            for param in params:
+            for x, param in enumerate(params):
                 if p != '':
                     p += ', '
                 if True:#param['required'] == "false":
@@ -127,7 +129,7 @@ def generate_function(o, constructor=False):
                     p += syntax["defaultParameter"].format(TYPE=param["type"].replace(' ','_'), VARIABLE=param["variable"], VALUE=val)
                 else:
                     p += syntax["parameter"].format(TYPE=param["type"].replace(' ', '_'), VARIABLE=param["variable"])
-                param_index += [param["variable"]]
+                param_index += [(param["variable"], _types[x] if _types is not None else None)]
     s_doc = ''
     if param_docs != "":
         d += multilineMiddle(1) + "Params:" + param_docs + "\n"
@@ -153,8 +155,13 @@ def generate_function(o, constructor=False):
         s += func["definition"].format(TYPE=types.get(r, r), NAME=o.get("name").replace("/", "_or_").replace(" ", "_").lower(), PARAMETERS=p, BODY=b)
     else:
         b = ''
-        for param in param_index:
-            b +=  addIndentation(2) + syntax['memberAssigment'].format(VARIABLE=param, VALUE=param) + l['lineend']
+        for param, _type in param_index:
+            _param = param
+            if constructor and _type[1]:
+                _param = syntax["list_cast"].format(TYPE=_type[0], VALUE=param)
+            elif constructor:
+                _param = syntax["cast"].format(TYPE=_type[0], VALUE=param)
+            b += addIndentation(2) + syntax['memberAssigment'].format(VARIABLE=param, VALUE=_param) + l['lineend']
         s += syntax["constructor"].format(PARAMETERS=p) + l['openScope'] +'\n'+ b + addIndentation(1)+ l['closeScope'] +'\n'
     return s+'\n'
 
