@@ -12,11 +12,13 @@
         "memberDeclaration":"",
         "memberAssigment":"self.{VARIABLE} = {VALUE}",
         "inlineDefinition":"{VARIABLE} = {VALUE}",
-        "constructor": "def __init__(self, {PARAMETERS})",
+        "constructor": "def __init__(self, {PARAMETERS}, **kwargs)",
         "requireConstructor":true,
         "route": "Route({METHOD}, {PATH})",
-        "cast":"{TYPE}({VALUE})",
-        "list_cast":"[{TYPE}(i) for i in {VALUE}]"
+        "cast":"{TYPE}({UNPACK}{VALUE})",
+        "list_cast":"[{TYPE}({UNPACK}i) for i in {VALUE}]",
+        "conditional_cast":"{TYPE}",
+        "unpack":"**"
     },
     "enum":{
         "type":"class",
@@ -30,7 +32,10 @@
         "decorator":"@{NAME}({PARAMETERS})",
         "returnType":"",
         "definition":"def {NAME}({PARAMETERS}) -> {TYPE}{BODY}",
-        "returnSyntax":"return {RETURN}"
+        "returnSyntax":"return {RETURN}",
+        "returnListSyntax":"return [{TYPE}({UNPACK}i) for i in {RETURN}]",
+        "args":"*args",
+        "kwargs":"**kwargs"
     },
     "types":{
         "string": "str",
@@ -45,6 +50,17 @@
         "file contents":"bytes",
         "constructor":"__init__",
         "flag":"Flag"
+    },
+    "default_values":{
+        "str":"''",
+        "bool":"False",
+        "int":"0",
+        "list":"[]",
+        "null":"None",
+        "datetime.datetime":"None"
+    },
+    "casts":{
+        "datetime.datetime":"datetime.datetime.fromisotimestamp({VALUE}) if type(s) is str else None"
     },
     "values":{
         "false":"False",

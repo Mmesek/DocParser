@@ -26,7 +26,8 @@
         "decorator":"@{NAME}({PARAMETERS})",
         "returnType":"{TYPE}",
         "definition":"{TYPE} {NAME}({PARAMETERS}) {BODY}",
-        "returnSyntax":"return {RETURN};" 
+        "returnSyntax":"return {RETURN};",
+        "returnListSyntax":"return {RETURN};"
     },
     "types":{
         "integer":"int",
@@ -40,6 +41,8 @@
         "constructor":"this",
         "list":"{TYPE}[{SIZE}]"
     },
+    "default_values":{},
+    "casts":{},
     "values":{
         "true":"true",
         "false":"false",

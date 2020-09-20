@@ -3,7 +3,7 @@ from generator_utils import *
 def load_language(language):
     with open(f"templates/{language}.json", "r", newline="", encoding="utf-8") as file:
         _ = json.load(file)
-    global syntax, enum, func, types, values, sizes, l, methods
+    global syntax, enum, func, types, values, sizes, l, methods, defaults, casts
 
     syntax = _["structure"]
     enum = _["enum"]
@@ -13,6 +13,8 @@ def load_language(language):
     sizes = _["sizes"]
     l = _["language"]
     methods = _["methods"]
+    defaults = _["default_values"]
+    casts = _["casts"]
     return syntax, enum, func, types, values, sizes, l, methods
 
 def check_sizes(variables):
@@ -125,7 +127,12 @@ def generate_function(o, constructor=False):
                         val = val.split(' ')[0]
                     elif param["type"] == "str" and val == '':
                         val = '""'
-                    val = values.get(val,val)
+                    #val = values.get(val, val)
+                    val = defaults.get(param["type"], values.get(val, val))
+                    if val == 'None' and 'List' in param["type"]:
+                        val = defaults.get('list', '[]')
+                    elif param["type"] not in defaults:
+                        val = '{}'
                     p += syntax["defaultParameter"].format(TYPE=param["type"].replace(' ','_'), VARIABLE=param["variable"], VALUE=val)
                 else:
                     p += syntax["parameter"].format(TYPE=param["type"].replace(' ', '_'), VARIABLE=param["variable"])
@@ -147,7 +154,14 @@ def generate_function(o, constructor=False):
     elif constructor is False:
         s += s_doc
     if o.get('return', None) != None:
-        b += func['returnSyntax'].format(RETURN=_r+'()')
+        if o.get('return_list', False):
+            if _r not in list(types.values()):
+                unpack = syntax.get('unpack', '')
+            else:
+                unpack = ''
+            b += func['returnListSyntax'].format(TYPE=_r, UNPACK=unpack, RETURN='[]')
+        else:
+            b += func['returnSyntax'].format(RETURN=_r+'()')
 
     b += '\n' + l['closeScope']
     s += req_perm
@@ -157,10 +171,18 @@ def generate_function(o, constructor=False):
         b = ''
         for param, _type in param_index:
             _param = param
-            if constructor and _type[1]:
-                _param = syntax["list_cast"].format(TYPE=_type[0], VALUE=param)
-            elif constructor:
-                _param = syntax["cast"].format(TYPE=_type[0], VALUE=param)
+            if _type[0] not in list(types.values()):
+                unpack = syntax.get('unpack', '')
+            else:
+                unpack = ''
+            _t = casts.get(_type[0], _type[0])
+            if _t != _type[0]:
+                _param = syntax["conditional_cast"].format(TYPE=_t.format(VALUE=param))
+            else:
+                if constructor and _type[1]:
+                    _param = syntax["list_cast"].format(TYPE=_t, VALUE=param, UNPACK=unpack)
+                elif constructor:
+                    _param = syntax["cast"].format(TYPE=_t, VALUE=param, UNPACK=unpack)
             b += addIndentation(2) + syntax['memberAssigment'].format(VARIABLE=param, VALUE=_param) + l['lineend']
         s += syntax["constructor"].format(PARAMETERS=p) + l['openScope'] +'\n'+ b + addIndentation(1)+ l['closeScope'] +'\n'
     return s+'\n'
