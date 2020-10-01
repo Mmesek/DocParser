@@ -2,11 +2,11 @@
     "structure":{
         "type": "struct",
         "struct": "{TYPE} {NAME}",
-        "docstring":"/*{DOC}*/",
+        "docstring":"/**{DOC}*/",
         "variable": "{TYPE} {VARIABLE}",
         "parameter":"{TYPE} {VARIABLE}",
         "defaultParameter": "{TYPE} {VARIABLE} = {VALUE}",
-        "memberDoc":"// {DOC}",
+        "memberDoc":"/// {DOC}",
         "memberDeclaration": "{TYPE} {VARIABLE}",
         "memberAssigment": "{VARIABLE} = {VALUE}",
         "inlineDefinition": "{TYPE} {VARIABLE} = {VALUE}",
@@ -76,6 +76,16 @@
         "multilineCommentEnd":"*/",
         "param_docstring":"{NAME} = {DESC}",
         "fileExt":"d",
-        "boilerplate":"import std.typecons, core.time;\nalias snowflake = long;\n"
+        "boilerplate":"import std.typecons, core.time;\nalias snowflake = long;\n",
+        "PackageFile":"package",
+        "import":"import {PACKAGE}",
+        "importFrom":"import {PACKAGE} : {SYMBOL};",
+        "PublicImport":"public import {PACKAGE};"
+    },
+    "documentation":{
+        "member":"/// {DOC}",
+        "object":"/**{DOC}*/",
+        "place":"above",
+        "perMember":true
     }
 }

@@ -3,7 +3,7 @@ from generator_utils import *
 def load_language(language):
     with open(f"templates/{language}.json", "r", newline="", encoding="utf-8") as file:
         _ = json.load(file)
-    global syntax, enum, func, types, values, sizes, l, methods, defaults, casts
+    global syntax, enum, func, types, values, sizes, l, methods, defaults, casts, documentation
 
     syntax = _["structure"]
     enum = _["enum"]
@@ -15,6 +15,7 @@ def load_language(language):
     methods = _["methods"]
     defaults = _["default_values"]
     casts = _["casts"]
+    documentation = _["documentation"]
     return syntax, enum, func, types, values, sizes, l, methods
 
 def check_sizes(variables):
@@ -69,8 +70,13 @@ def iterate_variables(o, function=False):
             member = enum["member"].format(MEMBER=t, VALUE=name)
             name = t
         if v.get("docstring", "") != "":
-            docs += multilineMiddle(1) + addIndentation(1) + l["param_docstring"].format(NAME=name, DESC=v["docstring"])
+            if not function and documentation['perMember']:
+                pass
+            else:
+                docs += multilineMiddle(1) + addIndentation(1) + l["param_docstring"].format(NAME=name, DESC=v["docstring"])
         if not function:
+            if v.get("docstring", "") != "" and documentation['perMember']:
+                members += addIndentation(1) + syntax['memberDoc'].format(DOC=v['docstring']) +'\n'
             members += addIndentation(1) + member
         else:
             members += [member]
@@ -244,3 +250,9 @@ def generate_enum_of_routes(o):
     s+= m
     s+= l['closeScope'] + '\n'
     return s
+
+def generate_package_file(o):
+    m = ""
+    for f in o:
+        m += l['PublicImport'].format(PACKAGE=f) +'\n'
+    return m
