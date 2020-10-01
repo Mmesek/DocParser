@@ -1,5 +1,5 @@
 {
-    "base_url":"https://raw.githubusercontent.com/discordapp/discord-api-docs/master/docs/",
+    "base_url":"https://raw.githubusercontent.com/discord/discord-api-docs/master/docs/",
     "files": [
         "resources/Audit_Log.md",
         "resources/Channel.md",
