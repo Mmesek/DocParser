@@ -76,7 +76,7 @@ def iterate_variables(o, function=False):
                 docs += multilineMiddle(1) + addIndentation(1) + l["param_docstring"].format(NAME=name, DESC=v["docstring"])
         if not function:
             if v.get("docstring", "") != "" and documentation['perMember']:
-                members += addIndentation(1) + syntax['memberDoc'].format(DOC=v['docstring']) +'\n'
+                members += addIndentation(1) + documentation['member'].format(DOC=v['docstring']) +'\n'
             members += addIndentation(1) + member
         else:
             members += [member]
@@ -147,15 +147,15 @@ def generate_function(o, constructor=False):
     if param_docs != "":
         d += multilineMiddle(1) + "Params:" + param_docs + "\n"
     if d != '':
-        if l['docstring'] == 'below':
+        if documentation['place'] == 'below':
             scope = '    '
             mid = '\n    '
         else:
             mid = '\n  '
             scope = ''
-        s_doc += syntax['docstring'].format(DOC=d.replace('\*', '*').replace('\n', mid).rstrip() + '\n'+scope).rstrip() + '\n'
+        s_doc += documentation['object'].format(DOC=d.replace('\*', '*').replace('\n', mid).rstrip() + '\n'+scope).rstrip() + '\n'
     b = l['openScope'] +'\n' + addIndentation(1) + b
-    if l['docstring'] == 'below' and constructor is False:
+    if documentation['place'] == 'below' and constructor is False:
         b += s_doc + addIndentation(1)
     elif constructor is False:
         s += s_doc
@@ -204,19 +204,19 @@ def generate_object(o):
     if docs != "":
         d += multilineMiddle(1) + "Params:" + docs + "\n"
     if d != "":
-        if l["docstring"] == "below":
+        if documentation["place"] == "below":
             d += addIndentation(1) + "\n"
             s_doc += (
-                syntax["docstring"]
+                documentation["object"]
                 .format(DOC=d.replace("\*", "*").replace("\n", "\n    ").rstrip() + "\n" + addIndentation(1))
                 .rstrip()
             )
         else:
             s_doc += (
-                syntax["docstring"].format(DOC=d.replace("\*", "*").replace("\n", "\n  ").rstrip() + "\n").rstrip()
+                documentation["object"].format(DOC=d.replace("\*", "*").replace("\n", "\n  ").rstrip() + "\n").rstrip()
                 + "\n"
             )
-    if l["docstring"] == "above":
+    if documentation["place"] == "above":
         s += s_doc
     if enum_type == None:
         s += syntax["struct"].format(TYPE=syntax["type"], NAME=o["name"].replace(" ", "_").replace("_Structure", "")) + l["openScope"]
@@ -226,7 +226,7 @@ def generate_object(o):
         else:
             e = 'enum'
         s += syntax['struct'].format(TYPE=enum['type'], NAME=enum.get(e, enum.get('enum')).format(NAME=o['name'].replace(' ', '_'), TYPE=enum_type)) + l['openScope']
-    if l["docstring"] == "below":
+    if documentation["place"] == "below":
         s += '\n'+addIndentation(1) + s_doc
     s += "\n" + members
     if syntax.get('requireConstructor', False) and not any(i in o['name'].lower() for i in ['type', 'flag', 'event']):

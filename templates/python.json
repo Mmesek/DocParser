@@ -2,13 +2,11 @@
     "structure":{
         "type": "class",
         "struct": "{TYPE} {NAME}",
-        "docstring":"'''{DOC}'''",
         "variable_": "{VARIABLE}: {VALUE}",
         "variable": "{VARIABLE}: {TYPE}",
         "parameter": "{VARIABLE}: {TYPE}",
         "defaultParameter": "{VARIABLE}: {TYPE}={VALUE}",
         "slots": "__slots__ = ('{VARIABLES}')",
-        "memberDoc":"# {DOC}",
         "memberDeclaration":"",
         "memberAssigment":"self.{VARIABLE} = {VALUE}",
         "inlineDefinition":"{VARIABLE} = {VALUE}",
@@ -91,7 +89,6 @@
         "closeScope": "",
         "lineend": "\n",
         "delimeter": "indentation",
-        "docstring":"below",
         "comment":"#",
         "multilineCommentStart":"'''",
         "multilineCommentEnd":"'''",
@@ -105,5 +102,11 @@
         "import":"import {PACKAGE}",
         "importFrom":"from {PACKAGE} import {SYMBOL}",
         "PublicImport":"import {PACKAGE}"
+    },
+    "documentation":{
+        "member":"# {DOC}",
+        "object":"'''{DOC}'''",
+        "place":"below",
+        "perMember":false
     }
 }
