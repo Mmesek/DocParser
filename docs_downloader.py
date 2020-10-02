@@ -27,5 +27,8 @@ if __name__ == "__main__":
         import glob
         from os.path import dirname
         _o = glob.glob(dirname(__file__) + '/docs_structures/**/*', recursive=True)
-        structures = '- '+'\n- '.join([i.replace('\\', '/').split('/')[-1].split('.')[0] for i in _o])
-        print('Specify json from docs_structures to use\n\tAvailable structures:\n'+structures)
+        structures = '- ' + '\n- '.join([i.replace('\\', ' / ').split(' / ')[-1].split('. ')[0] for i in _o])
+        if len(_o) == 1:
+            download_docs(_o[0].replace('\\', ' / ').split(' / ')[-1].split('.')[0])
+        else:
+            print('Specify json from docs_structures to use\n\tAvailable structures:\n'+structures)
