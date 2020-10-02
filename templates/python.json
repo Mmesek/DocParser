@@ -100,6 +100,10 @@
         "spaces":true,
         "fileExt":"py",
         "boilerplate":"from __future__ import annotations\nfrom enum import Enum, Flag\nfrom typing import List\nimport datetime\n",
-        "additional":["slots"]
+        "additional":["slots"],
+        "PackageFile":"__init__",
+        "import":"import {PACKAGE}",
+        "importFrom":"from {PACKAGE} import {SYMBOL}",
+        "PublicImport":"import {PACKAGE}"
     }
 }

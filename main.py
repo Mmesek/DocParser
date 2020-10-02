@@ -1,4 +1,4 @@
-from json_parser_test import iterate
+from json_parser_test import iterate, createPackage
 from utils import args, listFiles
 from docs_downloader import download_docs
 from docs_parser import create_json, parse_docs, save_json
@@ -24,5 +24,6 @@ parsed_docs = listFiles('results/jsons')
 for doc in parsed_docs:
     print("Generating code for", doc)
     iterate(doc)
+createPackage(parsed_docs)
 
 print("Done in", time.time() - s)

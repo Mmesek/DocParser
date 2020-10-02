@@ -44,6 +44,8 @@ def iterate(name):
     s += "\n\n" + r + e
     save(name, s)
 
+def createPackage(files):
+    save(l['PackageFile'], generate_package_file(files))
 
 def save(name, s):
     check_if_exists('results/src'+'/'+args()[1])
@@ -54,7 +56,8 @@ if __name__ == "__main__":
     import sys
     try:
         iterate(sys.argv[3])
-    except:
+    except Exception as ex:
+        print(ex)
         import glob
         from os.path import dirname
         _o = glob.glob(dirname(__file__) + '/results/jsons/**/*', recursive=True)
