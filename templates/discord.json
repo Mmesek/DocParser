@@ -1,0 +1,26 @@
+{
+    "translations":{
+        "Member":"Guild_Member",
+        "Team_Member":"Team_Members",
+        "Audit_Log_Event":"Audit_Log_Events",
+        "Channel_Overwrite":"Overwrite",
+        "Channel_Type":"Channel_Types",
+        "Sticker":"Message_Sticker",
+        "Allowed_Mention_Type":"Allowed_Mention_Types",
+        "Guild_Feature":"Guild_Features",
+        "Integration_Expire_Behavior":"Integration_Expire_Behaviors",
+        "Account":"Integration_Account",
+        "Update_Status":"Gateway_Status_Update",
+        "Presence":"Presence_Update",
+        "Timestamps":"Activity_Timestamps",
+        "Party":"Activity_Party",
+        "Assets":"Activity_Assets",
+        "Secrets":"Activity_Secrets",
+        "Buttons":"Activity_Buttons",
+        "Embeds":"Embed",
+        "Allowed_Mention":"Allowed_Mention_Types",
+        "_Application_Command_Permissions":"Application_Command_Permissions",
+        "Option_Type":"dict",
+        "Unavailable_Guild":"Guild"
+    }
+}

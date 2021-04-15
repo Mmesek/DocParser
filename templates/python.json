@@ -4,18 +4,22 @@
         "struct": "{TYPE} {NAME}",
         "variable_": "{VARIABLE}: {VALUE}",
         "variable": "{VARIABLE}: {TYPE}",
-        "parameter": "{VARIABLE}: {TYPE}",
-        "defaultParameter": "{VARIABLE}: {TYPE}={VALUE}",
+        "defaultVariable":"{VARIABLE}: {TYPE} = {VALUE}",
+        "definition": "class {NAME}{BODY}",
+        "definitionInheritance": "class {NAME}({PARENT}){BODY}",
         "slots": "__slots__ = ('{VARIABLES}')",
         "memberDeclaration":"",
         "memberAssigment":"self.{VARIABLE} = {VALUE}",
         "inlineDefinition":"{VARIABLE} = {VALUE}",
+        "enumVariable":"{VARIABLE} = {TYPE}",
         "constructor": "def __init__(self, {PARAMETERS}, **kwargs)",
-        "requireConstructor":true,
+        "requireConstructor":false,
         "route": "Route({METHOD}, {PATH})",
-        "cast":"{TYPE}({UNPACK}{VALUE})",
+        "cast":"{TYPE}({UNPACK}{VALUE} or {DEFAULT})",
         "list_cast":"[{TYPE}({UNPACK}i) for i in {VALUE}]",
         "conditional_cast":"{TYPE}",
+        "enum":"Enum",
+        "flag":"Flag",
         "unpack":"**"
     },
     "enum":{
@@ -29,43 +33,64 @@
     "function":{
         "decorator":"@{NAME}({PARAMETERS})",
         "returnType":"",
-        "definition":"def {NAME}({PARAMETERS}) -> {TYPE}{BODY}",
+        "definition":"async def {NAME}({PARAMETERS}) -> {TYPE}{BODY}",
+        "not_impl":"raise NotImplementedError",
         "returnSyntax":"return {RETURN}",
+        "api_call":"await self.api_call({PARAMETERS})",
         "returnListSyntax":"return [{TYPE}({UNPACK}i) for i in {RETURN}]",
         "args":"*args",
         "kwargs":"**kwargs"
+    },
+    "method":{
+        "definition":"def {NAME}(self, {PARAMETERS}) -> {TYPE}:{INDENT}{BODY}"
+    },
+    "documentation":{
+        "member":"# {DOC}",
+        "object":"'''{DOC}'''",
+        "place":"below",
+        "perMember":false
     },
     "types":{
         "string": "str",
         "boolean":"bool",
         "integer": "int",
-        "snowflake": "int",
+        "snowflake": "Snowflake",
         "nullable":"{TYPE}",
         "list":"List[{TYPE}]",
+        "array":"list",
+        "object":"dict",
+        "json":"Dict[{KEY_TYPE}, {VALUE_TYPE}]",
         "null": "None",
         "none":"None",
-        "ISO8601 timestamp": "datetime.datetime",
+        "absent":"None",
+        "unsigned_short":"c_ushort",
+        "unsigned_integer":"c_uint",
+        "binary_data":"bytearray",
+        "iso8601_timestamp": "datetime",
+        "timestamp":"datetime",
+        "mixed": "dict",
         "file contents":"bytes",
         "constructor":"__init__",
+        "image_data":"str",
         "flag":"Flag"
+    },
+    "values":{
+        "false":"False",
+        "true":"True",
+        "none":"None",
+        "Image_data":"''",
+        "absent":"None"
     },
     "default_values":{
         "str":"''",
         "bool":"False",
         "int":"0",
-        "list":"[]",
+        "list":"list",
         "null":"None",
-        "datetime.datetime":"None"
-    },
-    "casts":{
-        "datetime.datetime":"datetime.datetime.fromisotimestamp({VALUE}) if type(s) is str else None"
-    },
-    "values":{
-        "false":"False",
-        "true":"True",
-        "none":"None"
-    },
-    "methods":{
+        "dict":"dict",
+        "Image_data":"''",
+        "datetime":"datetime.now().isoformat()",
+        "snowflake":"0"
     },
     "sizes":{
         "None":16,
@@ -89,24 +114,26 @@
         "closeScope": "",
         "lineend": "\n",
         "delimeter": "indentation",
+        "unpack":"**",
+        "string":"\"",
         "comment":"#",
         "multilineCommentStart":"'''",
         "multilineCommentEnd":"'''",
-        "param_docstring":":{NAME}: {DESC}",
+        "param_docstring":"{NAME}:\n{INDENTATION}{INDENTATION}{DESC}",
+        "parameter": "{VARIABLE}: {TYPE}",
+        "argument": "{PARAMETER} = {VALUE}",
+        "decorator":"@{NAME}",
+        "decoratorWithParameters":"@{NAME}({PARAMETERS})",
+        "defaultParameter": "{VARIABLE}: {TYPE}={VALUE}",
+        "json_member": "\"{VARIABLE}\": {VALUE}",
         "indentationCount":"4",
         "spaces":true,
         "fileExt":"py",
-        "boilerplate":"from __future__ import annotations\nfrom enum import Enum, Flag\nfrom typing import List\nimport datetime\n",
+        "boilerplate":"from __future__ import annotations\nfrom enum import Enum, Flag\nfrom typing import List, Dict\nfrom datetime import datetime\nfrom ctypes import c_byte, c_uint, c_ushort\nfrom dataclasses import dataclass\n\nSnowflake = int\n\nclass DiscordObject:\n    pass\n\ndef Permissions(*permissions):\n    pass\n\n",
         "additional":["slots"],
         "PackageFile":"__init__",
         "import":"import {PACKAGE}",
         "importFrom":"from {PACKAGE} import {SYMBOL}",
         "PublicImport":"import {PACKAGE}"
-    },
-    "documentation":{
-        "member":"# {DOC}",
-        "object":"'''{DOC}'''",
-        "place":"below",
-        "perMember":false
     }
 }
