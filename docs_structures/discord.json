@@ -1,20 +1,27 @@
 {
     "base_url":"https://raw.githubusercontent.com/discord/discord-api-docs/master/docs/",
     "files": [
+        "resources/Application.md",
         "resources/Audit_Log.md",
         "resources/Channel.md",
         "resources/Emoji.md",
         "resources/Guild.md",
         "resources/Invite.md",
+        "resources/Stage_Instance.md",
         "resources/User.md",
         "resources/Voice.md",
         "resources/Webhook.md",
         "topics/Gateway.md",
+        "topics/OAuth2.md",
         "topics/Opcodes_and_Status_Codes.md",
         "topics/Permissions.md",
         "topics/Rate_Limits.md",
+        "topics/Teams.md",
+        "topics/Threads.md",
         "topics/Voice_Connections.md",
-        "Reference.md"
+        "Reference.md",
+        "interactions/Message_Components.md",
+        "interactions/Slash_Commands.md"
     ],
     "endpoint":"#",
     "section":"#",

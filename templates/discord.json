@@ -21,6 +21,12 @@
         "Allowed_Mention":"Allowed_Mention_Types",
         "_Application_Command_Permissions":"Application_Command_Permissions",
         "Option_Type":"dict",
-        "Unavailable_Guild":"Guild"
+        "Unavailable_Guild":"Guild",
+        "Message_Components":"Component",
+        "Message_Interaction":"Interaction",
+        "Update_Presence":"Presence_Update",
+        "Interaction_Request_Type": "Interaction_Type",
+        "Components":"Component",
+        "Thread_Members":"Thread_Member"
     }
 }
