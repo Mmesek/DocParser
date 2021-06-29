@@ -6,7 +6,63 @@ returns_array_base_type_pattern = re.compile(r"(array|list) of (.*)")
 return_empty_pattern = re.compile(r"Returns .*? ?204 .*? success")
 digits_pattern = re.compile(r"(?i)(\d+|one|two|three|four|five|six|seven|eight|nine|ten)")
 
+json_pattern = re.compile(r"Map of (.*) to ?(.*)")
+
 url_pattern = re.compile(r"\[.*?\]\((.*?\/).*?\)")
+
+from typing import Dict, Type, List, Tuple, Any
+from dataclasses import dataclass, asdict
+
+@dataclass
+class Structure:
+    name: str
+    docstring: List[str]
+    def __init__(self, name: str='', docstring: str=[], **kwargs) -> None:
+        self.name = name.strip('#').strip()
+        self.docstring = docstring
+        for kwarg in kwargs:
+            setattr(self, kwarg, kwargs[kwarg])
+    def as_dict(self):
+        _dict = asdict(self)
+        for field in _dict:
+            if field == '_Client':
+                continue
+            #if is_dataclass(_dict.get(field)):
+            #    _dict[field] = asdict(_dict.get(field))
+            else:
+                from .utils import as_dict
+                _dict[field] = as_dict(_dict.get(field))
+        if "_Client" in _dict:
+            _dict.pop("_Client")
+        return _dict
+
+@dataclass
+class Parameter(Structure):
+    type: Type = None
+    optional: bool = False
+    array_size: int = 0
+    mapping_type: Type = None
+    default: Any = None
+@dataclass
+class Table(Structure):
+    parameters: List[Parameter]
+    def __init__(self, name: str='', docstring: str=[], parameters: List[Parameter]=[], **kwargs) -> None:
+        self.parameters = parameters
+        super().__init__(name=name, docstring=docstring, **kwargs)
+@dataclass
+class Endpoint(Table):
+    required_permissions: List[str]
+    query_parameters: List[Parameter]
+    json_parameters: List[Parameter]
+    method: str = ''
+    path: str = ''
+    return_type: str = None
+    return_list: bool = None
+    return_mapping: bool = None
+@dataclass
+class Model(Table):
+    methods: List[Endpoint]
+
 
 def check_urls(doc: str) -> str:
     urls = url_pattern.findall(doc)
@@ -44,6 +100,20 @@ def check_list(field: str) -> Tuple[bool, int, str]:
         if is_list and (any(i in _type[-2].lower() for i in ['e','t','r']) and _type.lower().strip()[-1] == 's') or _type.lower() in ['integers', 'strings']:
             _type = _type.strip()[:-1]
     return is_list, size, _type
+
+def check_dict(field: str) -> Tuple[bool, str, str]:
+    is_dict = False
+    key_type = ''
+    value_type = ''
+    if 'map of' in field.lower():
+        is_dict = True
+        _types = json_pattern.findall(field)
+        #breakpoint
+        key_type, value_type = _types[0]
+        if key_type.lower() == 'id':
+            key_type = 'snowflake'
+        value_type = value_type.replace('Objects', '').replace('Partial','').strip('_').strip()
+    return is_dict, key_type, value_type
 
 def detect_header(section: list) -> Tuple[str, list, list, int]:
     table_started = False
