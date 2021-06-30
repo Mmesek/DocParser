@@ -2,54 +2,53 @@ import re
 
 return_pattern = re.compile(r"Returns .*? \[(.*?)\]\(.*?\) object")
 returns_array_custom_type_pattern = re.compile(r"(array|list) of (?:.*?)?\[(.*?)\](\(.*?\))?")
+custom_type = re.compile(r"\[(.*?)\](\(.*?\))?")
 returns_array_base_type_pattern = re.compile(r"(array|list) of (.*)")
 return_empty_pattern = re.compile(r"Returns .*? ?204 .*? success")
 digits_pattern = re.compile(r"(?i)(\d+|one|two|three|four|five|six|seven|eight|nine|ten)")
 
+json_custom_type_pattern = re.compile(r"Map of (.*) to (?:.*?)?\[(.*?)\](\(.*?\))?")
 json_pattern = re.compile(r"Map of (.*) to ?(.*)")
 
 url_pattern = re.compile(r"\[.*?\]\((.*?\/).*?\)")
 
 from typing import Dict, Type, List, Tuple, Any
-from dataclasses import dataclass, asdict
 
-@dataclass
 class Structure:
     name: str
     docstring: List[str]
     def __init__(self, name: str='', docstring: str=[], **kwargs) -> None:
-        self.name = name.strip('#').strip()
-        self.docstring = docstring
+        self.set_name(name)
+        self.set_description(docstring)
         for kwarg in kwargs:
             setattr(self, kwarg, kwargs[kwarg])
+    def set_name(self, name: str):
+        self.name = name.strip('#').strip().replace('-','_').replace('`','')
+    def set_description(self, description: List[str]):
+        docstring = [check_urls(i) for i in description if type(i) not in {dict, list}]
+        self.docstring = '\n'.join(docstring)
+        
     def as_dict(self):
-        _dict = asdict(self)
-        for field in _dict:
-            if field == '_Client':
-                continue
-            #if is_dataclass(_dict.get(field)):
-            #    _dict[field] = asdict(_dict.get(field))
-            else:
-                from .utils import as_dict
-                _dict[field] = as_dict(_dict.get(field))
-        if "_Client" in _dict:
-            _dict.pop("_Client")
-        return _dict
+        d = {}
+        from doc_parser.utils import as_dict
+        for key, value in self.__dict__.items():
+            d[key] = as_dict(value)
+        return d
 
-@dataclass
+
 class Parameter(Structure):
     type: Type = None
     optional: bool = False
     array_size: int = 0
-    mapping_type: Type = None
+    mapping_type: List[str] = None
     default: Any = None
-@dataclass
+
 class Table(Structure):
     parameters: List[Parameter]
     def __init__(self, name: str='', docstring: str=[], parameters: List[Parameter]=[], **kwargs) -> None:
         self.parameters = parameters
         super().__init__(name=name, docstring=docstring, **kwargs)
-@dataclass
+
 class Endpoint(Table):
     required_permissions: List[str]
     query_parameters: List[Parameter]
@@ -59,8 +58,9 @@ class Endpoint(Table):
     return_type: str = None
     return_list: bool = None
     return_mapping: bool = None
-@dataclass
+
 class Model(Table):
+    _type: str
     methods: List[Endpoint]
 
 
@@ -79,11 +79,11 @@ def check_list(field: str) -> Tuple[bool, int, str]:
         returns = returns_array_custom_type_pattern.findall(field)
         if returns != []:
             if returns[0][1] != '':
-                _type = check_urls(returns[0][1].replace(' ', '_'))
+                _type = check_urls(returns[0][1].replace(' ', '_').split(',',1)[0])
         else:
             returns = returns_array_base_type_pattern.findall(field)
             if returns != [] and returns[0][1] != '':
-                _type = check_urls(returns[0][1].replace(' ', '_'))
+                _type = check_urls(returns[0][1].replace(' ', '_').split(',',1)[0])
         is_list = True
         digit = digits_pattern.findall(field)
         if digit != []:
@@ -107,9 +107,13 @@ def check_dict(field: str) -> Tuple[bool, str, str]:
     value_type = ''
     if 'map of' in field.lower():
         is_dict = True
-        _types = json_pattern.findall(field)
+        _types = json_custom_type_pattern.findall(field)
+        if _types == []:
+            _types = json_pattern.findall(field)
+            key_type, value_type = _types[0]
+        else:
+            key_type, value_type = _types[0][:2]
         #breakpoint
-        key_type, value_type = _types[0]
         if key_type.lower() == 'id':
             key_type = 'snowflake'
         value_type = value_type.replace('Objects', '').replace('Partial','').strip('_').strip()
