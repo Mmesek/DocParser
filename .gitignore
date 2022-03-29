@@ -2,3 +2,4 @@
 code_gen/results/src/*
 doc_parser/markdowns/*
 results/jsons/*
+docs/*
