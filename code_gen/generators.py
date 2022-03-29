@@ -20,6 +20,8 @@ ENUMS = ["type", "code", "events", "level", "tier", "endpoints", "enum", "versio
 
 def iterate_params(params, get="description"):
     for i in params:
+        if type(i) is not dict:
+            i = {"name":i}
         name = "name"
         if i.get(name, i.get("id", "")).isdigit():
             name = "type"
@@ -31,22 +33,22 @@ def documentation(structure: dict, scope) -> str:
     if _documentation.get("perMember"):
         return _documentation.get("object").format(DOC=f"\n{addIndentation(scope)}".join(doc))
     _doc = []
-    for name, desc in iterate_params(structure.get("variables", [])):
+    for name, desc in iterate_params(structure.get("parameters", [])):
         if desc != '':
             _doc.append(language.get("param_docstring").format(NAME=name, DESC=desc, INDENTATION=addIndentation(1)))
 
-    for name, desc in iterate_params(structure.get("query_params", [])):
+    for name, desc in iterate_params(structure.get("query_parameters", [])):
         if desc != '':
             _doc.append(language.get("param_docstring").format(NAME=name, DESC=desc, INDENTATION=addIndentation(1)))
 
-    for name, desc in iterate_params(structure.get("json_params", [])):
+    for name, desc in iterate_params(structure.get("json_parameters", [])):
         if desc != '':
             _doc.append(language.get("param_docstring").format(NAME=name, DESC=desc, INDENTATION=addIndentation(1)))
 
     if _doc != []:
         if doc != []:
             doc.append("")
-        doc.append("Params\n"+addIndentation(1)+"------")
+        doc.append(f"{'Parameters' if structure.get('path',False) else 'Attributes'}"+"\n"+addIndentation(1)+"----------")
     doc += _doc
     if doc == []:
         return ""
@@ -84,10 +86,10 @@ from utils import addIndentation
 def function_definition(structure: dict, name: str) -> str:
     name = name.lower().replace("/",'_').replace("`",'').split('(',1)[0].strip().replace(" ","_")
 
-    parameters = [language.get("parameter").format(VARIABLE=i, TYPE=types.get("integer")) for i in structure.get("parameters")]
-    typed_parameters = iterate_variables(structure.get("query_params", []) + structure.get("json_params", []))
+    parameters = [language.get("parameter").format(VARIABLE=i, TYPE=types.get("integer")) for i in structure.get("parameters", [])]
+    typed_parameters = iterate_variables(structure.get("query_parameters", []) + structure.get("json_parameters", []))
     parameters = ", ".join(["self"] + parameters + typed_parameters)
-    type = cc2jl(structure.get("return"))
+    type = cc2jl(structure.get("return_type"))
     if type in _translations:
         type = _translations.get(type)
 
@@ -95,18 +97,18 @@ def function_definition(structure: dict, name: str) -> str:
     if _documentation.get("place") == "below":
         body += addIndentation(1) + documentation(structure, 1) + "\n"
     args = [("path", 'f"'+structure.get("path")+language.get("string")), ("method", language.get("string")+structure.get("method")+language.get("string"))]
-    _p = "{"+', '.join([language.get("json_member").format(VARIABLE=i.get("name"), VALUE=i.get("name")) for i in structure.get("query_params", [])])+"}"
+    _p = "{"+', '.join([language.get("json_member").format(VARIABLE=i.get("name"), VALUE=i.get("name")) for i in structure.get("query_parameters", [])])+"}"
     if _p != "{}":
         args.append(("params", _p))
-    _j = "{"+', '.join([language.get("json_member").format(VARIABLE=i.get("name"), VALUE=i.get("name")) for i in structure.get("json_params", [])])+"}"
+    _j = "{"+', '.join([language.get("json_member").format(VARIABLE=i.get("name"), VALUE=i.get("name")) for i in structure.get("json_parameters", [])])+"}"
     if _j != "{}":
         args.append(("json", _j))
     args = [language.get("argument").format(PARAMETER=i[0],VALUE=i[1]) for i in args if i != ()]
     body += addIndentation(1)
-    if structure.get("return", None):
+    if structure.get("return_type", None):
         body += "r = "
     body += function.get("api_call").format(PARAMETERS=", ".join(args))#"not_impl")
-    if structure.get("return", None):
+    if structure.get("return_type", None):
         body += "\n"+addIndentation(1)
         if not structure.get("return_list", False):
             body += function.get("returnSyntax").format(RETURN=type)+"(**r)" #TODO
@@ -114,8 +116,8 @@ def function_definition(structure: dict, name: str) -> str:
             body += function.get("returnListSyntax").format(TYPE=type, UNPACK=language.get("unpack"), RETURN="r") #TODO
             type = types.get("list").format(TYPE=type)
     func = ''
-    if structure.get("required_permission") != []:
-        func += function.get("decorator").format(NAME="Permissions", PARAMETERS=", ".join(['"%s"' % i for i in structure.get("required_permission")]))+'\n'
+    if structure.get("required_permission", []) != []:
+        func += function.get("decorator").format(NAME="Permissions", PARAMETERS=", ".join(['"%s"' % i for i in structure.get("required_permission", [])]))+'\n'
     func += function.get("definition").format(NAME=name, PARAMETERS=parameters, TYPE=type, BODY=body)
     return func
 
@@ -133,7 +135,7 @@ def structure(structure: dict, name: str) -> str:
         if d !="":
             docs += addIndentation(1) + d + "\n"
     enum_type = set()
-    for variable in structure.get("variables", []):
+    for variable in structure.get("parameters", []):
         var_name = variable.get("name", variable.get("field", variable.get("type", variable.get("event", variable.get("flag", variable.get("level", variable.get("feature", variable.get("mode", variable.get("permission", variable.get("key", variable.get("parameter", variable.get("status", variable.get("structure", variable.get("description", "None"))))))))))))))
         type = variable.get("type", variable.get("value", variable.get("code", variable.get("id", variable.get("key", variable.get("integer", variable.get("status", variable.get("path", variable.get("url", variable.get("extension", variable.get("description", "None")))))))))))
         if type.count(' ') > 3:
@@ -156,6 +158,9 @@ def structure(structure: dict, name: str) -> str:
         if variable.get("is_list", False):
             _type = type
             type = types.get("list").format(TYPE=type)
+        elif variable.get("is_json", False):
+            _type = type
+            type = types.get("json").format(KEY_TYPE=types.get(variable["key_type"], cc2jl(variable["key_type"])), VALUE_TYPE=type)
         var_name = var_name.replace('$','').replace('`','').replace(' ','_').replace("+","").replace('.','_').strip()
         if var_name[0] not in ['"',"'"]:
             var_name = var_name.replace("'",'').replace('"','')
@@ -202,7 +207,8 @@ def structure(structure: dict, name: str) -> str:
     struct = ''
     if parent not in [_structure.get('flag'),_structure.get('enum')]:
         struct += language.get("decorator").format(NAME="dataclass")+'\n'
-    enum_type = list(enum_type)[0]
+    if len(enum_type):
+        enum_type = list(enum_type)[0]
     if body == "":
         return ""
     body = docs+slots+body
