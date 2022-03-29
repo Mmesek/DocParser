@@ -1,5 +1,8 @@
 from utils import load, save
 import json
+
+ENDPOINTS = True
+
 with open('templates/python.json','r',newline='',encoding='utf-8') as file:
     language = json.load(file).get("language")
 import generators
@@ -32,7 +35,7 @@ def main(name: str) -> None:
         if "method" in json_structure[i]:
             functions.append(generators.function_definition(json_structure[i], i))
             routes.append(generators.route(json_structure[i], i))
-        elif type(json_structure[i]) == dict:
+        elif not ENDPOINTS and type(json_structure[i]) == dict:
             src_code += generators.structure(json_structure[i], i)
 
     src_code = (
@@ -41,6 +44,6 @@ def main(name: str) -> None:
         + generators.enum_of_routes(routes) 
         + "\n\n".join(functions)
     )
-    save(name, src_code)
+    save(name+"_endpoints" if ENDPOINTS else name, src_code)
 
 main("discord")
