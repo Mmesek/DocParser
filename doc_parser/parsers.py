@@ -1,36 +1,16 @@
 import re
-from .helpers import check_dict, detect_header, parse_columns, check_list, check_urls, Structure, Endpoint, Model, Parameter
+from .helpers import check_dict, detect_header, parse_columns, check_list, check_urls
+from .models import Parameter, Section, Table, Endpoint
+from .patterns import object_name_pattern
 
-object_name_pattern = re.compile(r"\[(.*?)\]\(.*?\)")
+from typing import List
 
-def squash_sections(sections: list):
-    _sections = []
-    current_section = []
-    for section in sections:
-        if type(section) is list:
-            current_section = section
-        elif len(current_section) > 0 and ' '.join(section.name.split(' ')[:-1]) in current_section[0].strip('#').strip():
-            current_section.append(section)
-        else:
-            if current_section != []:
-                _sections.append(current_section)
-                current_section = []
-            _sections.append(section)
-    return _sections
-
-def parse_table(section: dict) -> Structure:
-    try:
-        title, docs, fields, values_start = detect_header(section)
-    except Exception as ex:
-        title = section[0]
-        docs = section[1:]
-        fields = []
-        values_start = None
-    m = Model(name=title, parameters=[], methods=[])
+def parse_table(text: List[str]) -> Table:
+    title, docs, fields, values_start = detect_header(text)
+    _params = []
     if not values_start:
-        m.set_description(docs)
-        return m
-    for line in section[values_start:]:
+        return Table(title, docs, [])
+    for line in text[values_start:]:
         values = parse_columns(line)
         if len(values) == 1:
             docs.append(values[0].replace('\\*','*'))
@@ -58,7 +38,7 @@ def parse_table(section: dict) -> Structure:
                 if values[x] in ['global']:
                     values[x] = '_'+values[x]
                 values[x] = values[x].replace("partial","").strip()
-                from .utils import cc2jl, title_preserving_caps
+                from mlib.utils import cc2jl, title_preserving_caps
                 if p and p.type != None and field == 'type':
                     if cc2jl(_type).title() == _type.title().replace(' ','_'):
                         _type = _type.title()
@@ -75,53 +55,22 @@ def parse_table(section: dict) -> Structure:
                         values[x] = values[x].replace("object","").replace("Object","").strip("_").strip()
                         if values[x] in ['global']:
                             values[x] = '_'+values[x]
-                    if field == 'description':
-                        field = 'docstring'
+                    if field == 'docstring':
+                        field = 'description'
                     setattr(p, field, values[x].replace('?','').replace('\*', '').replace('*','').replace('\$','$').strip())
             if p.type and p.name:
                 if p.name.isdigit() and not p.type.isdigit():
                     p.type, p.name = p.name, p.type
-            m.parameters.append(p)
-    if any(i in m.name.lower() for i in {"type", "modes", "enum"}):
-        m.name = re.sub(r"enum|modes", "", m.name, flags=re.IGNORECASE).strip()
-        if len(m.name.split(' ')) > 2:
-            m.name = re.sub(r"types?", "", m.name, flags=re.IGNORECASE).strip()
-        m._type = "enum"
-    elif any(i in m.name.lower() for i in {"structure", "object"}):
-        #m.name = m.name.rstrip("structure").rstrip("object")
-        m.name = re.sub(r"structure|objects?", "", m.name, flags=re.IGNORECASE).strip()
-        m._type = "model"
-    elif any(i in m.name.lower() for i in {"flags"}):
-        m._type = "flag"
-    m.set_description(docs)
-    return m
+            _params.append(p)
+    return Table(title, docs, _params)
 
-def parse_endpoint(section: dict) -> Endpoint:
-    endpoint = Endpoint(docstring=[])
-    docs = []
-    for line in section:
-        if type(line) is Model:
-            if 'query' in line.name.lower():
-                endpoint.query_parameters = line.parameters
-            elif 'json' in line.name.lower():
-                endpoint.json_parameters = line.parameters
-            else:
-                endpoint.parameters = line.parameters
-            continue
-        elif '%' in line:
-            line = [i.strip() for i in line.split('%', 1)]
-            endpoint.set_name(line[0])
-            endpoint.method = line[1].split(' ', 1)[0].strip()
-            endpoint.path = re.sub(r"#(.*?)}", "}", line[1].split(' ', 1)[1].strip()).replace(".", "_")
-        else:
-            
-            docs.append(line)
-    endpoint.set_description(docs)
-    from .utils import require_permission_pattern, extract_return, params_pattern
-    endpoint.required_permissions = [i.strip("'").strip("`") for i in require_permission_pattern.findall('\n'.join(endpoint.docstring))]
-    endpoint.return_type, endpoint.return_list = extract_return(endpoint.docstring)
-    path_params = params_pattern.findall(re.sub(r"#(.*?)}", "}", endpoint.path).replace(".", "_"))
-    parameters = [c.strip() for c in path_params]
-    endpoint.parameters = list(dict.fromkeys(parameters))
-    
+def parse_endpoint(section: Section, table: Table) -> Endpoint:
+    endpoint = Endpoint(section.name)
+    if type(table) is str:
+        endpoint.append_description(table)
+    else:
+        endpoint.append_description(table.name)
+        endpoint.append_description(table.description)
+    endpoint.set_permissions()
+    endpoint.set_return()
     return endpoint

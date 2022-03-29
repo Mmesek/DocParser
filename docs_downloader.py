@@ -15,7 +15,9 @@ def download_docs(src):
         r = requests.get(base + link)
         if "/" in link:
             check_if_exists(docs_path + link.split("/")[0])
-        with open(_docs_path + link.replace("/", "\\"), "wb") as file:
+        #with open(_docs_path + link.replace("/", "\\"), "wb") as file:
+        #    file.write(r.content)
+        with open(_docs_path + "discord.md", "ab") as file:
             file.write(r.content)
 
 if __name__ == "__main__":

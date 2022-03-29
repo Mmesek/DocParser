@@ -1,68 +1,5 @@
-import re
-
-return_pattern = re.compile(r"Returns .*? \[(.*?)\]\(.*?\) object")
-returns_array_custom_type_pattern = re.compile(r"(array|list) of (?:.*?)?\[(.*?)\](\(.*?\))?")
-custom_type = re.compile(r"\[(.*?)\](\(.*?\))?")
-returns_array_base_type_pattern = re.compile(r"(array|list) of (.*)")
-return_empty_pattern = re.compile(r"Returns .*? ?204 .*? success")
-digits_pattern = re.compile(r"(?i)(\d+|one|two|three|four|five|six|seven|eight|nine|ten)")
-
-json_custom_type_pattern = re.compile(r"Map of (.*) to (?:.*?)?\[(.*?)\](\(.*?\))?")
-json_pattern = re.compile(r"Map of (.*) to ?(.*)")
-
-url_pattern = re.compile(r"\[.*?\]\((.*?\/).*?\)")
-
-from typing import Dict, Type, List, Tuple, Any
-
-class Structure:
-    name: str
-    docstring: List[str]
-    def __init__(self, name: str='', docstring: str=[], **kwargs) -> None:
-        self.set_name(name)
-        self.set_description(docstring)
-        for kwarg in kwargs:
-            setattr(self, kwarg, kwargs[kwarg])
-    def set_name(self, name: str):
-        self.name = name.strip('#').strip().replace('-','_').replace('`','')
-    def set_description(self, description: List[str]):
-        docstring = [check_urls(i) for i in description if type(i) not in {dict, list}]
-        self.docstring = '\n'.join(docstring)
-        
-    def as_dict(self):
-        d = {}
-        from doc_parser.utils import as_dict
-        for key, value in self.__dict__.items():
-            d[key] = as_dict(value)
-        return d
-
-
-class Parameter(Structure):
-    type: Type = None
-    optional: bool = False
-    array_size: int = 0
-    mapping_type: List[str] = None
-    default: Any = None
-
-class Table(Structure):
-    parameters: List[Parameter]
-    def __init__(self, name: str='', docstring: str=[], parameters: List[Parameter]=[], **kwargs) -> None:
-        self.parameters = parameters
-        super().__init__(name=name, docstring=docstring, **kwargs)
-
-class Endpoint(Table):
-    required_permissions: List[str]
-    query_parameters: List[Parameter]
-    json_parameters: List[Parameter]
-    method: str = ''
-    path: str = ''
-    return_type: str = None
-    return_list: bool = None
-    return_mapping: bool = None
-
-class Model(Table):
-    _type: str
-    methods: List[Endpoint]
-
+from typing import Tuple
+from .patterns import *
 
 def check_urls(doc: str) -> str:
     urls = url_pattern.findall(doc)
@@ -70,7 +7,7 @@ def check_urls(doc: str) -> str:
         nurl = url.replace('/','#').lower().replace('#docs_', 'https://discord.com/developers/docs/').replace('_', '/',1)
         doc = doc.replace(url, nurl)
     return doc
-from typing import Tuple
+
 def check_list(field: str) -> Tuple[bool, int, str]:
     is_list = False
     size = 0
@@ -87,7 +24,6 @@ def check_list(field: str) -> Tuple[bool, int, str]:
         is_list = True
         digit = digits_pattern.findall(field)
         if digit != []:
-            digits = {"one":1, "two":2, "three":3, "four":4, "five":5, "six":6, "seven":7, "eigth":8, "nine":9, "ten":10}
             size = digits.get(digit[0], digit[0])
             size = int(size)
             _type = _type.split("(")[0]
@@ -123,10 +59,11 @@ def detect_header(section: list) -> Tuple[str, list, list, int]:
     table_started = False
     title = None
     docs = []
+    values_start = None
     for x, line in enumerate(section):
         if '#' in line and not '|' in line:
             title = line
-        elif not table_started and '#' not in line:
+        elif not table_started and '#' not in line and '|' not in line:
             docs.append(line)
         column = parse_columns(line)
         if all('---' in value for value in column):
@@ -139,33 +76,3 @@ def detect_header(section: list) -> Tuple[str, list, list, int]:
 
 def parse_columns(row: str) -> list:
     return [i for i in [value.strip() for value in row.split('|')] if i != '']
-
-def extract_return(doc: str) -> Tuple[str, list]:
-    returns = ['']
-    r = None
-    if 'Return' in doc:
-        returns = return_pattern.findall(doc)
-        if returns == []:
-            success = return_empty_pattern.findall(doc)
-            if success != []:
-                returns = ['None']
-            elif returns == []:
-                returns = ['Dict']
-            else:
-                returns = [""]
-        if returns != [""]:
-            from .utils import cc2jl, title_preserving_caps
-            #if returns[0].replace(' ','_').title() == 
-            #returns = [cc2jl(returns[0]).title()]
-            returns = [title_preserving_caps(returns[0]).replace(' ','_')]
-            #returns = [returns[0].replace(' ','_').title()]
-        returns = [returns[0].replace('Dm_', '').replace('DM_','')]
-    if returns != [''] and 'None' not in returns[0] and 'Dict' not in returns[0]:
-        r = returns[0]
-        if 'returns a list of' in doc.lower() or 'returns an array of' in doc.lower():
-            return_list = True
-        else:
-            return_list = False
-    else:
-        return_list = False
-    return r, return_list
