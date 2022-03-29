@@ -24,6 +24,7 @@
         "decorator":"@{NAME}({PARAMETERS})",
         "returnType":"{TYPE}",
         "definition":"{TYPE} {NAME}({PARAMETERS}) {BODY}",
+        "api_call": "{PARAMETERS}",
         "returnSyntax":"return {RETURN};",
         "returnListSyntax":"return {RETURN};"
     },
@@ -31,7 +32,7 @@
         "integer":"int",
         "boolean":"bool",
         "str": "string",
-        "ISO8601 timestamp": "DateTime",
+        "Iso8601_Timestamp": "DateTime",
         "file contents":"File",
         "null": "void",
         "none": "null",
