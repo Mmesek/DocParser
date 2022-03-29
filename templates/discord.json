@@ -27,6 +27,8 @@
         "Update_Presence":"Presence_Update",
         "Interaction_Request_Type": "Interaction_Type",
         "Components":"Component",
-        "Thread_Members":"Thread_Member"
+        "Thread_Members":"Thread_Member",
+        "strings":"List[str]",
+        "snowflakes": "List[Snowflake]"
     }
 }

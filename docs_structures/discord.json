@@ -6,8 +6,11 @@
         "resources/Channel.md",
         "resources/Emoji.md",
         "resources/Guild.md",
+        "resources/Guild_Scheduled_Event.md",
+        "resources/Guild_Template.md",
         "resources/Invite.md",
         "resources/Stage_Instance.md",
+        "resources/Sticker.md",
         "resources/User.md",
         "resources/Voice.md",
         "resources/Webhook.md",
@@ -21,7 +24,9 @@
         "topics/Voice_Connections.md",
         "Reference.md",
         "interactions/Message_Components.md",
-        "interactions/Slash_Commands.md"
+        "interactions/Slash_Commands.md",
+        "interactions/Receiving_and_Responding.md",
+        "interactions/Application-Commands.md"
     ],
     "endpoint":"#",
     "section":"#",
