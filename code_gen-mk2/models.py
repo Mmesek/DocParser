@@ -52,6 +52,7 @@ class Object:
     lowercase: bool = True
     sane_value: bool = True
     constant: bool = False
+    _template: str = "parameter"
 
     def __post_init__(self):
         for field in self.__dict__:
@@ -80,9 +81,17 @@ class Object:
         if not _docs:
             return
         template = TEMPLATES.get("documentation", {})
-        docstring = TEMPLATES.get("docstring", "")  # TODO Move
+        if self._template == "attribute":
+            t = "inline_docstring"
+        else:
+            t = "docstring"
+
+        docstring = TEMPLATES.get(t, "")  # TODO Move
         INDENT = TEMPLATES.get("indent") * (2 if getattr(self, "is_method", False) else 1)
-        docs = indent(TEMPLATES.get("newline").join(_docs).strip(), INDENT)
+        if type(_docs) is list:
+            docs = indent(TEMPLATES.get("newline").join(_docs).strip(), INDENT)
+        else:
+            docs = _docs
         if docs.strip():
             return docstring.format(documentation=docs, indent=INDENT, newline=TEMPLATES.get("newline"))
 
@@ -145,9 +154,10 @@ class Parameter(Object):
     value: Optional[Any] = None
     """Argument or Default value"""
     lowercase: bool = True
+    _template: str = "parameter"
 
     def render(self):
-        template = TEMPLATES.get("parameter")
+        template = TEMPLATES.get(self._template)
 
         return self.format(template, type=self.type_.render(self.optional) if self.type_ else None, value=self.value)
 

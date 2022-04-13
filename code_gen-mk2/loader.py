@@ -12,7 +12,7 @@ objects.append(
 objects.append("")
 
 
-def to_list(dct, key):
+def to_list(dct, key, _class = False):
     return [
         Parameter(
             name=v.get("name"),
@@ -21,6 +21,7 @@ def to_list(dct, key):
             value=v.get("value", v.get("default", None)),
             optional=v.get("optional", False),
             nullable=v.get("nullable", False),
+            _template="parameter" if not _class else "attribute"
         )
         if type(v) is dict
         else Parameter(name=v)
@@ -89,7 +90,7 @@ for name, obj in t.items():
     if "path" in obj:
         objects.append(make_function(obj, name))
     else:
-        a = to_list(obj, "parameters")
+        a = to_list(obj, "parameters", True)
         methods = [make_function(obj.get("methods", {}).get(f), f, is_method=True) for f in obj.get("methods", [])]
         objects.append(Class(name, docs, attributes=a, methods=methods))
     objects.append("")
