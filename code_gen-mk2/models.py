@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from re import template
 from textwrap import indent
 from typing import Any, Optional
-from mlib.utils import try_quote, clean
+from mlib.utils import try_quote, clean, unquote
 
 TEMPLATES = {
     "Object": "name={name}, documentation={documentation}",
@@ -51,6 +51,7 @@ class Object:
     """Object's docstring"""
     lowercase: bool = True
     sane_value: bool = True
+    constant: bool = False
 
     def __post_init__(self):
         for field in self.__dict__:
@@ -98,19 +99,26 @@ class Object:
             }
         )
         if self.sane_value and d.get("value", None) not in [None, "None"]:
-            v = TEMPLATES.get("values", {}).get(d["value"], try_quote(d["value"]))
+            v = TEMPLATES.get("values", {}).get(d["value"], d["value"])
+            import re
+
+            flag = re.compile("\d+ ?<< ?\d+")
+            if not flag.search(v):
+                v = try_quote(unquote(v))
             if d["value"] == "absent":
                 breakpoint
             d["value"] = v  # try_quote(v)
-        if self.lowercase and "name" in d:
+        if not self.constant and self.lowercase and "name" in d:
             d["name"] = d["name"].lower()
+        elif self.constant and d.get("name"):
+            d["name"] = d["name"].upper()
         if "Structure" in self.name and not d.get("documentation"):
             breakpoint
         if type(template) is list:
             s = ""
             for _template in template:
                 try:
-                    s += _template.format_map({k: v for k, v in d.items() if v})
+                    s += _template.format_map({k: v for k, v in d.items() if v is not None})
                 except KeyError:
                     continue
         else:
@@ -257,6 +265,12 @@ class Class(Object):
         self.name = replace_multiple(self.name, TEMPLATES.get("to_strip", []), "").strip()
 
         template = TEMPLATES.get(_type, {})
+        if _type in {"enum", "flag"}:
+            for a in self.attributes:
+                a.constant = True
+                # if a.name is not None:
+                #    a.name = a.name.upper()
+            # self.attributes = [a.name.upper() for a in self.attributes if a.name]
         attributes = indent("\n".join([a.render() for a in self.attributes]), TEMPLATES.get("indent"))
         methods = "\n".join([m.render() for m in self.methods])
         bases = ", ".join(self.bases)

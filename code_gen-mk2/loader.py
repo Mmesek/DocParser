@@ -18,7 +18,7 @@ def to_list(dct, key):
             name=v.get("name"),
             documentation=v.get("description"),
             type_=Type(v.get("type")),
-            value=v.get("default", None),
+            value=v.get("value", v.get("default", None)),
             optional=v.get("optional", False),
             nullable=v.get("nullable", False),
         )
