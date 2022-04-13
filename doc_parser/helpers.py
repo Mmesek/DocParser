@@ -72,6 +72,23 @@ def detect_header(section: list) -> Tuple[str, list, list, int]:
         else:
             fields = column
             table_started = True
+    if "Description" not in fields:
+        for x, field in enumerate(fields):
+            if field in {"Meaning", "Status"}:
+                fields[x] = "Description"
+                break
+    if "Name" not in fields:
+        for x, field in enumerate(fields):
+            if field in {"Explanation", "Flag", "Event", "Permission", "Type", "Level", "Version", "Status", "Explanation", "Field", "Feature", "Mode", "Key", "Description"}:
+                fields[x] = "name"
+                break
+    if "Value" not in fields:
+        for x, field in enumerate(fields):
+            if field in {"ID", "Value", "websocket url append", "Code", "Structure", "Style", "Extension", "Path", "URL", "Integer", "Key", "Limit"}:
+                fields[x] = "value"
+                break
+            elif field == "Description" and "Type" not in fields:
+                fields[x] = "value"
     return title, docs, fields, values_start
 
 def parse_columns(row: str) -> list:
