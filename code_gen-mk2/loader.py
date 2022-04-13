@@ -45,7 +45,7 @@ def make_function(obj, name, **kwargs):
             RouteDecorator.with_arguments(
                 Parameter(name="method", value=method),
                 Parameter(name="path", value=path),
-                Parameter(name="returns", value=t.render(), sane_value=False),
+                Parameter(name="returns", value=t.render(), _sanitize_value=False),
             )
         )
     else:

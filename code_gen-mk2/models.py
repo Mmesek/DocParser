@@ -2,12 +2,7 @@ from dataclasses import dataclass
 from re import template
 from textwrap import indent
 from typing import Any, Optional
-from mlib.utils import try_quote, clean, unquote
-
-TEMPLATES = {
-    "Object": "name={name}, documentation={documentation}",
-    "Parameter": ["{name}", ": {type_}", " = {default}"],
-}
+from mlib.utils import try_quote, clean, unquote, replace_multiple
 
 import json
 
@@ -21,38 +16,21 @@ TEMPLATES = get_templates()
 
 
 @dataclass
-class Type:
-    type: type
-    key_type: str = None
-    value_type: str = None
-    is_array: bool = False
-    array_size: int = None
-    lowercase: bool = False
-
-    def render(self, optional: bool = False, nullable: bool = False):
-        TYPES = TEMPLATES.get("types", {})
-        _type = TYPES.get(self.type, self.type)
-        if self.is_array:
-            _type = TYPES.get("array", "{type}").format(type=_type, size=self.array_size)
-        if optional:
-            _type = TYPES.get("optional", "{type}").format(type=_type)
-        if nullable:
-            _type = TYPES.get("nullable", "{type}").format(type=_type)
-        return _type
-
-
-@dataclass
 class Object:
     """Base Object metadata"""
 
     name: str
     """Object's name"""
-    documentation: str = ""
+    documentation: str = None
     """Object's docstring"""
-    lowercase: bool = True
-    sane_value: bool = True
-    constant: bool = False
+    _lowercase: bool = True
+    """Whether name should be lowercased"""
+    _sanitize_value: bool = True
+    """Whether should attempt to sanitize and quote value"""
+    _constant: bool = False
+    """Whether name should be uppercased in case of constant"""
     _template: str = "parameter"
+    """Template to use"""
 
     def __post_init__(self):
         for field in self.__dict__:
@@ -107,19 +85,17 @@ class Object:
                 "indent": TEMPLATES.get("indent"),
             }
         )
-        if self.sane_value and d.get("value", None) not in [None, "None"]:
+        if self._sanitize_value and d.get("value", None) not in [None, "None"]:
             v = TEMPLATES.get("values", {}).get(d["value"], d["value"])
             import re
 
             flag = re.compile("\d+ ?<< ?\d+")
             if not flag.search(v):
                 v = try_quote(unquote(v))
-            if d["value"] == "absent":
-                breakpoint
-            d["value"] = v  # try_quote(v)
-        if not self.constant and self.lowercase and "name" in d:
+            d["value"] = v
+        if not self._constant and self._lowercase and "name" in d:
             d["name"] = d["name"].lower()
-        elif self.constant and d.get("name"):
+        elif self._constant and d.get("name"):
             d["name"] = d["name"].upper()
         if "Structure" in self.name and not d.get("documentation"):
             breakpoint
@@ -136,6 +112,31 @@ class Object:
 
 
 @dataclass
+class Type(Object):
+    """Type metadata"""
+
+    key_type: str = None
+    """Type of Key or main type"""
+    value_type: Optional[str] = None
+    """Type of value (If mapping)"""
+    is_array: bool = False
+    """Whether it's an array. If set, empty `array_size` means dynamic array"""
+    array_size: Optional[int] = None
+    """Array size (If it's an array)"""
+
+    def render(self, optional: bool = False, nullable: bool = False):
+        TYPES = TEMPLATES.get("types", {})
+        _type = TYPES.get(self.name, self.name)
+        if self.is_array:
+            _type = TYPES.get("array", "{type}").format(type=_type, size=self.array_size)
+        if optional:
+            _type = TYPES.get("optional", "{type}").format(type=_type)
+        if nullable:
+            _type = TYPES.get("nullable", "{type}").format(type=_type)
+        return _type
+
+
+@dataclass
 class Parameter(Object):
     """Parameter metadata"""
 
@@ -145,16 +146,8 @@ class Parameter(Object):
     """Whether this parameter is optional"""
     nullable: bool = False
     """Whether this parameter is nullable"""
-    # array_size: Optional[int] = 0
-    """Array size (If it's an array)"""
-    # mapping_type: Optional[tuple[str, str]] = Optional
-    """Tuple representing key and value types for dictonaries (maps) or array type and item type (lists or sets)"""
-    # default: Optional[Any] = Optional
-    """Default value"""
     value: Optional[Any] = None
     """Argument or Default value"""
-    lowercase: bool = True
-    _template: str = "parameter"
 
     def render(self):
         template = TEMPLATES.get(self._template)
@@ -183,9 +176,7 @@ class Function(Object):
     examples: Optional[str] = Optional
     """Example usage of this function"""
     arguments: Optional[list[Parameter]] = list
-    # arguments: Optional[list[Argument]] = Optional
     """Arguments to use with this function"""
-    lowercase: bool = True
 
     def with_arguments(self, *arguments: Parameter) -> "Function":
         """Returns Function with specified arguments for function call rendering"""
@@ -197,8 +188,6 @@ class Function(Object):
         decorators = indent(decorators, TEMPLATES.get("indent") * (0 if not self.is_method else 1))
         parameters = ", ".join([p.render() for p in self.parameters])
         kwargs = ", ".join([k.render() for k in self.keyword_only])
-        if not kwargs:
-            breakpoint
         all_params = []
         if parameters:
             all_params.append(parameters)
@@ -238,7 +227,7 @@ class Class(Object):
     """List of methods attached to this Class"""
     examples: Optional[str] = Optional
     """Example usage of this Class"""
-    lowercase: bool = False
+    _lowercase: bool = False
 
     def render(self):
         if any(
@@ -267,20 +256,16 @@ class Class(Object):
             _type = "enum"
         elif "flag" in self.name.lower():
             _type = "flag"
-        else:  # if "structure" in self.name.lower():
+        else:
             # elif any(i in self.name.lower() for i in {"structure", "fields", "object", "response", "params", "properties", "parameters", "activity", "info"}):
             _type = "class"
-        from mlib.utils import replace_multiple
 
         self.name = replace_multiple(self.name, TEMPLATES.get("to_strip", []), "").strip()
 
         template = TEMPLATES.get(_type, {})
         if _type in {"enum", "flag"}:
             for a in self.attributes:
-                a.constant = True
-                # if a.name is not None:
-                #    a.name = a.name.upper()
-            # self.attributes = [a.name.upper() for a in self.attributes if a.name]
+                a._constant = True
         attributes = indent("\n".join([a.render() for a in self.attributes]), TEMPLATES.get("indent"))
         methods = "\n".join([m.render() for m in self.methods])
         bases = ", ".join(self.bases)
