@@ -25,7 +25,7 @@ def to_list(dct, key, _class = False):
         )
         if type(v) is dict
         else Parameter(name=v)
-        for v in dct.get(key, [])
+        for v in dct.get(key, []) if v
     ]
 
 
@@ -92,6 +92,8 @@ for name, obj in t.items():
     else:
         a = to_list(obj, "parameters", True)
         methods = [make_function(obj.get("methods", {}).get(f), f, is_method=True) for f in obj.get("methods", [])]
+        if not a and not methods:
+            continue
         objects.append(Class(name, docs, attributes=a, methods=methods))
     objects.append("")
 
