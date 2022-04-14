@@ -168,7 +168,8 @@ class Parameter(Object):
         s = ""
         for _template in template:
             try:
-                s += _template.format(name=self.name, description=self.documentation, indent="{indent}", newline=TEMPLATES.get("newline"))
+                if self.documentation:
+                    s += _template.format(name=self.name, description=self.documentation, indent="{indent}", newline=TEMPLATES.get("newline"))
             except KeyError:
                 continue
         return s
