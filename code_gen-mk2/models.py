@@ -74,6 +74,8 @@ class Object:
             docs = indent(TEMPLATES.get("newline").join(_docs).strip(), INDENT)
         else:
             docs = _docs
+        if docs:
+            docs = docs.replace('"',"'")
 
         if params:
             _params = indent(TEMPLATES.get("newline").join(params).strip(), INDENT)
@@ -102,10 +104,11 @@ class Object:
             }
         )
         if self._sanitize_value and d.get("value", None) not in [None, "None"]:
-            v = TEMPLATES.get("values", {}).get(d["value"], d["value"])
-
+            v = d["value"]
             if not FLAG.search(v):
                 v = try_quote(unquote(v))
+            v = TEMPLATES.get("values", {}).get(d["value"], v)
+
             d["value"] = v
         if not self._constant and self._lowercase and "name" in d:
             d["name"] = d["name"].lower()
