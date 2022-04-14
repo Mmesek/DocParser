@@ -1,10 +1,12 @@
-from dataclasses import dataclass
-from re import template
-from textwrap import indent
+import json
+import re
 from typing import Any, Optional
+from dataclasses import dataclass
+from textwrap import indent
+
 from mlib.utils import try_quote, clean, unquote, replace_multiple
 
-import json
+FLAG = re.compile("\d+ ?<< ?\d+")
 
 
 def get_templates():
@@ -63,13 +65,27 @@ class Object:
             t = "inline_docstring"
         else:
             t = "docstring"
+        params = documentation.get("parameters")
 
         docstring = TEMPLATES.get(t, "")  # TODO Move
         INDENT = TEMPLATES.get("indent") * (2 if getattr(self, "is_method", False) else 1)
+
         if type(_docs) is list:
             docs = indent(TEMPLATES.get("newline").join(_docs).strip(), INDENT)
         else:
             docs = _docs
+
+        if params:
+            _params = indent(TEMPLATES.get("newline").join(params).strip(), INDENT)
+            s = ""
+            d = {"parameters": _params, "indent": INDENT, "newline": TEMPLATES.get("newline")}
+            for _template in template.get("parameters"):
+                try:
+                    s += _template.format_map({k: v for k, v in d.items() if v is not None})
+                except KeyError:
+                    continue
+            docs += TEMPLATES.get("newline") + s.replace("{indent}", INDENT)
+
         if docs.strip():
             return docstring.format(documentation=docs, indent=INDENT, newline=TEMPLATES.get("newline"))
 
@@ -81,24 +97,21 @@ class Object:
             {
                 "name": clean(self.name),
                 "newline": TEMPLATES.get("newline"),
-                "documentation": self.format_docs(main=self.documentation),
+                "documentation": self.format_docs(main=self.documentation, parameters=d.get("parameters_docs", None)),
                 "indent": TEMPLATES.get("indent"),
             }
         )
         if self._sanitize_value and d.get("value", None) not in [None, "None"]:
             v = TEMPLATES.get("values", {}).get(d["value"], d["value"])
-            import re
 
-            flag = re.compile("\d+ ?<< ?\d+")
-            if not flag.search(v):
+            if not FLAG.search(v):
                 v = try_quote(unquote(v))
             d["value"] = v
         if not self._constant and self._lowercase and "name" in d:
             d["name"] = d["name"].lower()
         elif self._constant and d.get("name"):
             d["name"] = d["name"].upper()
-        if "Structure" in self.name and not d.get("documentation"):
-            breakpoint
+
         if type(template) is list:
             s = ""
             for _template in template:
@@ -149,6 +162,17 @@ class Parameter(Object):
     value: Optional[Any] = None
     """Argument or Default value"""
 
+    def render_docs(self):
+        template = TEMPLATES.get("documentation")
+        template = template.get("parameter_documentation")
+        s = ""
+        for _template in template:
+            try:
+                s += _template.format(name=self.name, description=self.documentation, indent="{indent}", newline=TEMPLATES.get("newline"))
+            except KeyError:
+                continue
+        return s
+
     def render(self):
         template = TEMPLATES.get(self._template)
 
@@ -189,11 +213,14 @@ class Function(Object):
         parameters = ", ".join([p.render() for p in self.parameters])
         kwargs = ", ".join([k.render() for k in self.keyword_only])
         all_params = []
+        docs = [p.render_docs() for p in self.parameters]
         if parameters:
             all_params.append(parameters)
         if kwargs:
             all_params.append(TEMPLATES.get("keyword_only"))
             all_params.append(kwargs)
+            docs.extend([k.render_docs() for k in self.keyword_only])
+        docs = [_ for _ in docs if _]
         params = ", ".join(all_params)
         s = self.format(
             template.get("definition"),
@@ -201,6 +228,7 @@ class Function(Object):
             parameters=params,
             decorators=decorators,
             return_type=self.return_type.render(),
+            parameters_docs=docs,
         )
         return s
 
