@@ -23,8 +23,10 @@ def parse_table(text: List[str]) -> Table:
                 if x >= len(values):
                     continue
                 _is_list, _size, _type = check_list(values[x])
-                if '?' in values[x]:
+                if values[x].endswith("?"):
                     p.optional = True
+                elif values[x].startswith("?"):
+                    p.nullable = True
                 if _is_list:
                     p.array_size = _size
                 else:

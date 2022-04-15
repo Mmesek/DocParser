@@ -9,12 +9,13 @@ from mlib.utils import try_quote, clean, unquote, replace_multiple
 FLAG = re.compile("\d+ ?<< ?\d+")
 
 
-def get_templates():
-    with open("code_gen-mk2/python.json", "r", newline="", encoding="utf-8") as file:
+def get_templates(_t = "code_gen-mk2/python.json"):
+    with open(_t, "r", newline="", encoding="utf-8") as file:
         return json.load(file)
 
 
 TEMPLATES = get_templates()
+TRANSLATIONS = get_templates("templates/discord.json")
 
 
 @dataclass
@@ -139,16 +140,19 @@ class Type(Object):
     """Whether it's an array. If set, empty `array_size` means dynamic array"""
     array_size: Optional[int] = None
     """Array size (If it's an array)"""
+    def __post_init__(self):
+        self.name = TRANSLATIONS.get("translations", {}).get(self.name, self.name)
+        return super().__post_init__()
 
     def render(self, optional: bool = False, nullable: bool = False):
         TYPES = TEMPLATES.get("types", {})
         _type = TYPES.get(self.name, self.name)
         if self.is_array:
             _type = TYPES.get("array", "{type}").format(type=_type, size=self.array_size)
-        if optional:
-            _type = TYPES.get("optional", "{type}").format(type=_type)
         if nullable:
             _type = TYPES.get("nullable", "{type}").format(type=_type)
+        if optional:
+            _type = TYPES.get("optional", "{type}").format(type=_type)
         return _type
 
 
@@ -180,7 +184,7 @@ class Parameter(Object):
     def render(self):
         template = TEMPLATES.get(self._template)
 
-        return self.format(template, type=self.type_.render(self.optional) if self.type_ else None, value=self.value)
+        return self.format(template, type=self.type_.render(self.optional, self.nullable) if self.type_ else None, value=self.value)
 
     def as_argument(self):
         template = TEMPLATES.get("argument")

@@ -49,6 +49,7 @@ class Structure(EmptyMixin):
 class Parameter(Structure):
     type: Type = None
     optional: bool = False
+    nullable: bool = False
     array_size: Optional[int] = 0
     mapping_type: Optional[List[str]] = None
     default: Optional[Any] = None
