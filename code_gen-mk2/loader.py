@@ -28,6 +28,10 @@ def to_list(dct, key, _class = False):
         for v in dct.get(key, []) if v
     ]
 
+default_bases = TEMPLATES.get("default_bases") or []
+default_decorators = TEMPLATES.get("default_decorators") or []
+if default_decorators:
+    default_decorators = [Function(d) for d in default_decorators]
 
 def make_function(obj, name, **kwargs):
     # obj = dct.get(key)
@@ -94,7 +98,7 @@ for name, obj in t.items():
         methods = [make_function(obj.get("methods", {}).get(f), f, is_method=True) for f in obj.get("methods", [])]
         if not a and not methods:
             continue
-        objects.append(Class(name, docs, attributes=a, methods=methods))
+        objects.append(Class(name, docs, attributes=a, methods=methods, bases=default_bases, decorators=default_decorators))
     objects.append("")
 
 rendered = []

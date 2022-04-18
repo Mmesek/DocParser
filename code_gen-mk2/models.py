@@ -248,7 +248,7 @@ class Function(Object):
 
     def as_decorator(self):
         template = TEMPLATES.get("decorator", "")
-        return self.format(template, arguments=", ".join([a.as_argument() for a in self.arguments if a.value]))
+        return self.format(template, arguments=", ".join([a.as_argument() for a in self.arguments if a.value]) if self.arguments else None)
 
 
 @dataclass
@@ -261,6 +261,8 @@ class Class(Object):
     """Atributes/Fields of this Class"""
     methods: Optional[list[Function]] = list
     """List of methods attached to this Class"""
+    decorators: Optional[list["Function"]] = list
+    """List of Functions decorating this class"""
     examples: Optional[str] = Optional
     """Example usage of this Class"""
     _lowercase: bool = False
@@ -302,10 +304,11 @@ class Class(Object):
         if _type in {"enum", "flag"}:
             for a in self.attributes:
                 a._constant = True
+        decorators = "\n".join([d.as_decorator() for d in self.decorators])
         attributes = indent("\n".join([a.render() for a in self.attributes]), TEMPLATES.get("indent"))
         methods = "\n".join([m.render() for m in self.methods])
-        bases = ", ".join(self.bases)
-        s: str = self.format(template.get("definition"), bases=bases, attributes=attributes, methods=methods)
+        bases = ", ".join(self.bases) if self.bases else None
+        s: str = self.format(template.get("definition"), bases=bases, attributes=attributes, methods=methods, decorators=decorators)
         if len(set([i.strip() for i in s.splitlines()])) <= 1:
             return ""
         return s
