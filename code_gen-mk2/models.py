@@ -102,6 +102,8 @@ class Object:
                 "newline": TEMPLATES.get("newline"),
                 "documentation": self.format_docs(main=self.documentation, parameters=d.get("parameters_docs", None)),
                 "indent": TEMPLATES.get("indent"),
+                "new_scope": TEMPLATES.get("new_scope"),
+                "end_scope": TEMPLATES.get("end_scope"),
             }
         )
         if self._sanitize_value and d.get("value", None) not in [None, "None"]:

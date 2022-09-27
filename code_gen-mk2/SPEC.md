@@ -5,6 +5,8 @@
 - `documentation`
 - `newline`
 - `indent`
+- `new_scope`
+- `end_scope`
 # Class:
 - `bases`
 - `attributes`
