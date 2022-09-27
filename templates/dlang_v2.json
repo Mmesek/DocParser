@@ -1,0 +1,177 @@
+{
+    "indent": "    ",
+    "newline": "\n",
+    "comment": "// ",
+    "new_scope": "{",
+    "end_scope": "}",
+    "inline_docstring": "// {documentation}",
+    "docstring": "/* {newline}{documentation}{newline}*/",
+    "parameter": [
+        "{type} ",
+        "{name}",
+        " = {value}"
+    ],
+    "argument": "{name}={value}",
+    "class": {
+        "definition": [
+            "{documentation}{newline}",
+            "class {name}",
+            "({bases})",
+            "{new_scope}", "{newline}",
+            "{attributes}",
+            "{methods}",
+            "{newline}",
+            "{end_scope}"
+        ],
+        "definition_join": "newline",
+        "attribute_missing": "skip"
+    },
+    "attribute": [
+        "{documentation}{newline}",
+        "{type}",
+        " {name}",
+        " = {value}"
+    ],
+    "function": {
+        "definition": [
+            "{documentation}{newline}",
+            "{decorators}{newline}",
+            "{return_type}", " {name}(",
+            "{parameters}",
+            ")",
+            "{new_scope}",
+            "{newline}",
+            "{indent}{body}",
+            "{newline}",
+            "{end_scope}"
+        ],
+        "body": "return {function_call}",
+        "call": "{name}({arguments})"
+    },
+    "method": {
+        "definition": [
+            "{newline}",
+            "{indent}{documentation}{newline}",
+            "{decorators}{newline}",
+            "{indent}",
+            "{async_keyword}",
+            "{return_type}", " {name}(this",
+            ", {parameters}",
+            ")",
+            "{new_scope}", "{newline}",
+            "{indent}{indent}{body}",
+            "{newline}",
+            "{end_scope}"
+        ],
+        "body": "return {function_call}",
+        "call": "self.{name}({arguments})"
+    },
+    "documentation": {
+        "docstring": "{description}",
+        "parameters": [
+            "{newline}{indent}Parameters{newline}",
+            "{indent}----------{newline}",
+            "{parameters}",
+            ""
+        ],
+        "parameters_join": "newline",
+        "parameter_documentation": [
+            "{name}:{newline}",
+            "{indent}{description}"
+        ],
+        "parameter_documentation_join": "newline",
+        "inline_parameter_documentation": "{description}",
+        "returns": [
+            "{indent}Returns",
+            "{indent}-------",
+            "{indent}{return}",
+            "{indent}{indent}{return_description}",
+            "{indent}"
+        ],
+        "returns_join": "newline"
+    },
+    "route": {
+        "definition": "{name_upper} = Route({url_method}, {path}, {result})",
+        "usage": "{name_upper}({arguments})",
+        "json_argument_single": "{name} = {name}",
+        "json_argument": "{json_arguments}",
+        "query_argument_single": "\"{name}\": {name}",
+        "query_argument": "query_parameters = {{query_arguments}}"
+    },
+    "not_impl": "raise NotImplementedError",
+    "decorator": [ "@{name}", "({arguments})" ],
+    "enum": {
+        "definition": [
+            "enum {name}", "({type})", "{new_scope}", "{newline}",
+            "{indent}{documentation}{newline}",
+            "{attributes}",
+            "{newline}",
+            "{end_scope}"
+        ],
+        "member": [
+            "{newline}{indent}{documentation}",
+            "{name}",
+            " = {value}"
+        ]
+    },
+    "flag": {
+        "definition": [
+            "{documentation}{newline}",
+            "class {name}(Flag){new_scope}{newline}",
+            "{attributes}",
+            "{newline}",
+            "{end_scope}"
+        ],
+        "member": [
+            "{newline}{indent}{documentation}",
+            "{name}",
+            " = {value}"
+        ]
+    },
+    "types": {
+        "string": "string",
+        "boolean": "bool",
+        "integer": "int",
+        "absent": "None",
+        "snowflake": "Snowflake",
+        "optional": "Optional!{type}",
+        "nullable": "Nullable!{type}",
+        "list": "{type}[]",
+        "array": "list",
+        "object": "JSON",
+        "Dict": "JSON",
+        "json": "JSON[{key}, {value}]",
+        "null": "null",
+        "binary": "bytearray",
+        "iso8601_timestamp": "datetime",
+        "ISO8601 timestamp": "datetime",
+        "timestamp": "datetime",
+        "mixed": "dict",
+        "file contents": "bytes",
+        "constructor": "__init__",
+        "flag": "Flag",
+        "Image Data": "str",
+        "Unsigned short": "c_ushort",
+        "Unsigned integer": "c_uint",
+        "Binary data": "bytearray",
+        "void": "void"
+    },
+    "values": {
+        "absent": "null",
+        "none": "null",
+        "false": "false",
+        "true": "true"
+    },
+    "default_values": {
+        "bool": "false",
+        "int": "0",
+        "dict": "dict",
+        "list": "list",
+        "set": "set",
+        "default": "null",
+        "id": "Snowflake"
+    },
+    "to_strip": [ "Structure", "Codes", "Event Fields", "Extra Fields", "Event Codes", "Event Additional Fields", "Object", "Response" ],
+    "default_bases": [ "DiscordObject" ],
+    "default_decorators": [ ]
+}
