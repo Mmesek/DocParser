@@ -12,7 +12,7 @@ objects.append(
 objects.append("")
 
 
-def to_list(dct, key, _class = False):
+def to_list(dct, key, _class=False):
     return [
         Parameter(
             name=v.get("name"),
@@ -21,17 +21,20 @@ def to_list(dct, key, _class = False):
             value=v.get("value", v.get("default", None)),
             optional=v.get("optional", False),
             nullable=v.get("nullable", False),
-            _template="parameter" if not _class else "attribute"
+            _template="parameter" if not _class else "attribute",
         )
         if type(v) is dict
         else Parameter(name=v)
-        for v in dct.get(key, []) if v
+        for v in dct.get(key, [])
+        if v
     ]
+
 
 default_bases = TEMPLATES.get("default_bases") or []
 default_decorators = TEMPLATES.get("default_decorators") or []
 if default_decorators:
     default_decorators = [Function(d) for d in default_decorators]
+
 
 def make_function(obj, name, **kwargs):
     # obj = dct.get(key)
@@ -98,7 +101,9 @@ for name, obj in t.items():
         methods = [make_function(obj.get("methods", {}).get(f), f, is_method=True) for f in obj.get("methods", [])]
         if not a and not methods:
             continue
-        objects.append(Class(name, docs, attributes=a, methods=methods, bases=default_bases, decorators=default_decorators))
+        objects.append(
+            Class(name, docs, attributes=a, methods=methods, bases=default_bases, decorators=default_decorators)
+        )
     objects.append("")
 
 rendered = []
