@@ -10,21 +10,44 @@ objects.append(
     TEMPLATES.get("comment") + "Generated source code at " + f'{datetime.datetime.today().strftime("%H:%M %Y/%m/%d")}'
 )
 objects.append("")
+default_values = TEMPLATES.get("default_values")
 
 
-def to_list(dct, key, _class=False):
+def to_list(dct, key, _class=False, mandatory=False):
     return [
-        Parameter(
-            name=v.get("name"),
-            documentation=v.get("description"),
-            type_=Type(v.get("type")),
-            value=v.get("value", v.get("default", None)),
-            optional=v.get("optional", False),
-            nullable=v.get("nullable", False),
-            _template="parameter" if not _class else "attribute",
+        (
+            Parameter(
+                name=v.get("name"),
+                documentation=v.get("description"),
+                type_=Type(v.get("type")),
+                value=v.get(
+                    "value",
+                    (
+                        v.get(
+                            "default",
+                            default_values.get(
+                                "nullable"
+                                if v.get("nullable")
+                                else (
+                                    "optional"
+                                    if v.get("optional")
+                                    else (
+                                        "list"
+                                        if v.get("type", "").startswith("list")
+                                        else "dict" if v.get("type", "").startswith("dict") else v.get("type", "None")
+                                    )
+                                )
+                            ),
+                        )
+                    ),
+                ),
+                optional=v.get("optional", False),
+                nullable=v.get("nullable", False),
+                _template="parameter" if not _class else "attribute",
+            )
+            if type(v) is dict
+            else Parameter(name=v, type_=Type(TEMPLATES.get("default_types").get(v, "str")), mandatory=mandatory)
         )
-        if type(v) is dict
-        else Parameter(name=v)
         for v in dct.get(key, [])
         if v
     ]
@@ -52,14 +75,14 @@ def make_function(obj, name, **kwargs):
             RouteDecorator.with_arguments(
                 Parameter(name="method", value=method),
                 Parameter(name="path", value=path),
-                Parameter(name="returns", value=t.render(), _sanitize_value=False),
+                # Parameter(name="returns", value=t.render(), _sanitize_value=False),
             )
         )
     else:
         q = []
         decorators = []
 
-    _params = to_list(obj, "parameters")
+    _params = to_list(obj, "parameters", mandatory=True)
     j = to_list(obj, "json_parameters")
     j.sort(key=lambda x: (x.optional, False if x.value is None else True))
     _params.extend(j)
@@ -115,7 +138,7 @@ for obj in objects:
 
 
 def to_file():
-    with open("code.py", "w", newline="", encoding="utf-8") as file:
+    with open("generated_code.py", "w", newline="", encoding="utf-8") as file:
         file.write(TEMPLATES.get("newline").join(rendered))
 
 

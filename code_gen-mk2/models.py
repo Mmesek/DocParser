@@ -1,7 +1,7 @@
 import json
 import re
 from typing import Any, Optional
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from textwrap import indent
 
 from mlib.utils import try_quote, clean, unquote, replace_multiple
@@ -9,7 +9,7 @@ from mlib.utils import try_quote, clean, unquote, replace_multiple
 FLAG = re.compile("\d+ ?<< ?\d+")
 
 
-def get_templates(_t="templates/python.json"):
+def get_templates(_t="templates/python_v2.json"):
     with open(_t, "r", newline="", encoding="utf-8") as file:
         return json.load(file)
 
@@ -71,10 +71,16 @@ class Object:
         docstring = TEMPLATES.get(t, "")  # TODO Move
         INDENT = TEMPLATES.get("indent") * (2 if getattr(self, "is_method", False) else 1)
 
-        if type(_docs) is list:
-            docs = indent(TEMPLATES.get("newline").join(_docs).strip(), INDENT)
+        if type(_docs) is list and len(_docs) == 1:
+            _docs = _docs[0]
+
+        _docs = [d.strip() for d in _docs.split(". ")]
+        _docs = [line + "." if not line.endswith(".") else line for line in _docs if line]
+        if t == "docstring":
+            docs = indent(TEMPLATES.get("newline").join(_docs).strip(), prefix=INDENT)
         else:
-            docs = _docs
+            docs = " ".join(_docs)
+
         if docs:
             docs = docs.replace('"', "'")
 
@@ -171,6 +177,7 @@ class Parameter(Object):
     """Whether this parameter is nullable"""
     value: Optional[Any] = None
     """Argument or Default value"""
+    mandatory: bool = False
 
     def render_docs(self):
         template = TEMPLATES.get("documentation")
@@ -193,7 +200,13 @@ class Parameter(Object):
         template = TEMPLATES.get(self._template)
 
         return self.format(
-            template, type=self.type_.render(self.optional, self.nullable) if self.type_ else None, value=self.value
+            template,
+            type=self.type_.render(self.optional, self.nullable) if self.type_ else None,
+            value=(
+                self.value or TEMPLATES.get("default_values").get(self.type_.name if self.type_ else "", "None")
+                if not self.mandatory
+                else None
+            ),
         )
 
     def as_argument(self):
@@ -209,7 +222,7 @@ class Function(Object):
     """List of parameters in this function"""
     keyword_only: list[Parameter] = list
     """List of keyword-only parameters in this function"""
-    return_type: Type = Type(None)
+    return_type: Type = field(default_factory=lambda: Type(None))
     """Return type"""
     is_method: bool = False
     """Whether it's a method"""

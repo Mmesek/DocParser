@@ -1,6 +1,6 @@
 {
-    "indent":"    ",
-    "newline":"\n",
+    "indent": "    ",
+    "newline": "\n",
     "comment": "# ",
     "inline_docstring": "\"\"\"{documentation}\"\"\"",
     "docstring": "\"\"\"{newline}{documentation}{newline}{indent}\"\"\"",
@@ -93,9 +93,9 @@
         "query_argument_single": "\"{name}\": {name}",
         "query_argument": "query_parameters = {{query_arguments}}"
     },
-    "not_impl":"raise NotImplementedError",
-    "decorator":["@{name}", "({arguments})"],
-    "enum":{
+    "not_impl": "raise NotImplementedError",
+    "decorator": [ "@{name}", "({arguments})" ],
+    "enum": {
         "definition": [
             "class {name}(Enum):{newline}",
             "{indent}{documentation}{newline}",
@@ -106,10 +106,11 @@
             ": {type}",
             " = {value}",
             "{newline}{indent}{documentation}"
-        ]
+        ],
+        "default": "auto()"
     },
-    "flag":{
-        "definition":[
+    "flag": {
+        "definition": [
             "class {name}(Flag):{newline}",
             "{indent}{documentation}{newline}",
             "{attributes}"
@@ -119,52 +120,77 @@
             ": {type}",
             " = {value}",
             "{newline}{indent}{documentation}"
-        ]
+        ],
+        "default": "auto()"
     },
-    "types":{
+    "types": {
         "string": "str",
-        "boolean":"bool",
+        "boolean": "bool",
         "integer": "int",
         "absent": "None",
         "snowflake": "Snowflake",
-        "optional":"Optional[{type}]",
-        "nullable":"Nullable[{type}]",
-        "list":"list[{type}]",
-        "array":"list",
-        "object":"dict",
-        "Dict":"dict",
-        "json":"dict[{key}, {value}]",
+        "optional": "Optional[{type}]",
+        "nullable": "{type} | UnsetType",
+        "list": "list[{type}]",
+        "List": "list[{type}]",
+        "array": "list",
+        "object": "dict",
+        "Dict": "dict",
+        "dict": "dict",
+        "json": "dict[{key}, {value}]",
         "null": "None",
-        "binary":"bytearray",
+        "binary": "bytearray",
         "iso8601_timestamp": "datetime",
         "ISO8601 timestamp": "datetime",
-        "timestamp":"datetime",
+        "timestamp": "datetime",
         "mixed": "dict",
-        "file contents":"bytes",
-        "constructor":"__init__",
-        "flag":"Flag",
-        "Image Data":"str",
-        "Unsigned short":"c_ushort",
-        "Unsigned integer":"c_uint",
-        "Binary data":"bytearray"
+        "file contents": "bytes",
+        "constructor": "__init__",
+        "flag": "Flag",
+        "Image Data": "str",
+        "Unsigned short": "c_ushort",
+        "Unsigned integer": "c_uint",
+        "Binary data": "bytearray",
+        "UNSET": "UNSET"
     },
-    "values":{
+    "values": {
         "absent": "None",
         "none": "None",
         "false": "False",
-        "true": "True"
+        "true": "True",
+        "list": "list",
+        "dict": "dict",
+        "mapping": "dict",
+        "Mixed": "Any",
+        "UNSET": "UNSET"
     },
-    "default_values":{
+    "default_values": {
         "bool": "False",
         "int": "0",
         "dict": "dict",
         "list": "list",
         "set": "set",
         "default": "None",
-        "id": "Snowflake"
-    }, 
+        "id": "Snowflake",
+        "optional": "None",
+        "nullable": "UNSET"
+    },
+    "default_types": {
+        "guild_id": "Snowflake",
+        "channel_id": "Snowflake",
+        "user_id": "Snowflake",
+        "message_id": "Snowflake",
+        "webhook_id": "Snowflake",
+        "application_id": "Snowflake",
+        "role_id": "Snowflake",
+        "emoji_id": "Snowflake",
+        "command_id": "Snowflake",
+        "overwrite_id": "Snowflake",
+        "interaction_id": "Snowflake",
+        "integration_id": "Snowflake"
+    },
     "keyword_only": "*",
-    "to_strip": ["Structure", "Codes", "Event Fields", "Extra Fields", "Event Codes", "Event Additional Fields", "Object", "Response"],
-    "default_bases": ["DiscordObject"],
-    "default_decorators": ["dataclass"]
+    "to_strip": [ "Structure", "Codes", "Event Fields", "Extra Fields", "Event Codes", "Event Additional Fields", "Object", "Response" ],
+    "default_bases": [ "DiscordObject" ],
+    "default_decorators": [ ]
 }
