@@ -10,6 +10,7 @@
         " = {value}"
     ],
     "argument": "{name}={value}",
+    "permission_argument": "Permissions.{value}",
     "class": {
         "definition": [
             "{decorators}{newline}",
@@ -126,24 +127,28 @@
     "types": {
         "string": "str",
         "boolean": "bool",
+        "Boolean": "bool",
         "integer": "int",
+        "double": "float",
+        "number": "float",
         "absent": "None",
         "snowflake": "Snowflake",
         "optional": "Optional[{type}]",
-        "nullable": "{type} | UnsetType",
+        "nullable": "Nullable[{type}]",
         "list": "list[{type}]",
         "List": "list[{type}]",
         "array": "list",
         "object": "dict",
-        "Dict": "dict",
-        "dict": "dict",
+        "Dict": "dict[{key}, {value}]",
+        "dict": "dict[{key}, {value}]",
         "json": "dict[{key}, {value}]",
         "null": "None",
         "binary": "bytearray",
         "iso8601_timestamp": "datetime",
         "ISO8601 timestamp": "datetime",
         "timestamp": "datetime",
-        "mixed": "dict",
+        "mixed": "dict[{key}, {value}]",
+        "mapping": "dict[{key}, {value}]",
         "file contents": "bytes",
         "constructor": "__init__",
         "flag": "Flag",
@@ -151,7 +156,9 @@
         "Unsigned short": "c_ushort",
         "Unsigned integer": "c_uint",
         "Binary data": "bytearray",
-        "UNSET": "UNSET"
+        "UNSET": "UNSET",
+        "Any":"Any",
+        "float": "float"
     },
     "values": {
         "absent": "None",
